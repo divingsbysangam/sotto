@@ -1,0 +1,215 @@
+name: Sotto
+options:
+  bundleIdPrefix: com.divingsbysangam
+  deploymentTarget:
+    macOS: "14.0"
+  xcodeVersion: "26.0"
+  createIntermediateGroups: true
+
+packages:
+  HotKey:
+    url: https://github.com/soffes/HotKey.git
+    from: 0.2.0
+  WhisperKit:
+    url: https://github.com/argmaxinc/WhisperKit.git
+    from: 1.1.0  # 1.1.0 fixes empty transcripts when promptTokens (Vocabulary) are set (argmaxinc/WhisperKit#514)
+  Sparkle:
+    url: https://github.com/sparkle-project/Sparkle
+    from: 2.6.0
+  # L5: optional local LLM for cleanup (downloaded on demand). mlx-swift compiles Metal kernels,
+  # so building needs Xcode's Metal Toolchain (xcodebuild -downloadComponent MetalToolchain).
+  MLXSwiftLM:
+    url: https://github.com/ml-explore/mlx-swift-lm
+    exactVersion: 3.32.3
+  MLX:
+    url: https://github.com/ml-explore/mlx-swift
+    exactVersion: 0.32.3
+  FluidAudio:
+    url: https://github.com/FluidInference/FluidAudio
+    exactVersion: 0.17.7
+  MLXAudio:
+    url: https://github.com/Blaizzy/mlx-audio-swift
+    exactVersion: 0.1.6
+  SwiftTransformers:
+    url: https://github.com/huggingface/swift-transformers
+    from: 1.3.4
+
+targets:
+  Sotto:
+    type: application
+    platform: macOS
+    sources:
+      - path: Sotto
+        # Only code and assets go in the bundle: no plists/entitlements (set via build settings),
+        # alternate entitlements (e.g. Sotto.entitlements.appstore), docs, or xcconfigs.
+        excludes:
+          - "**/*.plist"
+          - "**/*.entitlements"
+          - "**/*.entitlements.*"
+          - "**/*.md"
+          - "**/*.xcconfig"
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.divingsbysangam.sotto
+        PRODUCT_NAME: Sotto
+        MARKETING_VERSION: "2.0"
+        CURRENT_PROJECT_VERSION: "13"
+        INFOPLIST_FILE: Sotto/Info.plist
+        CODE_SIGN_ENTITLEMENTS: Sotto/Sotto.entitlements
+        ENABLE_HARDENED_RUNTIME: YES
+        CODE_SIGN_STYLE: Automatic
+        DEVELOPMENT_TEAM: ""
+        SWIFT_VERSION: "5.9"
+        MACOSX_DEPLOYMENT_TARGET: "14.0"
+        LD_RUNPATH_SEARCH_PATHS: "@executable_path/../Frameworks"
+        COMBINE_HIDPI_IMAGES: YES
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        SOTTO_ENABLE_TESTABILITY: NO
+      configs:
+        Release:
+          ENABLE_TESTABILITY: "$(SOTTO_ENABLE_TESTABILITY)"
+    dependencies:
+      - package: HotKey
+      - package: WhisperKit
+      - package: Sparkle
+        product: Sparkle
+      - package: MLXSwiftLM
+        product: MLXLLM
+      - package: MLXSwiftLM
+        product: MLXLMCommon
+      - package: MLX
+        product: MLX
+      - package: FluidAudio
+      - package: MLXAudio
+        product: MLXAudioSTT
+      - package: SwiftTransformers
+        product: Tokenizers
+      # L14: the `sotto` command-line tool, bundled at Contents/Helpers/sotto (not Contents/MacOS:
+      # `sotto` and `Sotto` collide on case-insensitive APFS).
+      - target: sotto-cli
+        embed: true
+        codeSign: false
+        copy:
+          destination: wrapper
+          subpath: Contents/Helpers
+    entitlements:
+      path: Sotto/Sotto.entitlements
+      properties:
+        # Hardened Runtime requires Audio Input even when the user's microphone grant exists.
+        com.apple.security.device.audio-input: true
+        # Local self-signed certificates have no Apple Team ID. Keep hardened runtime,
+        # but allow the bundled Sparkle framework to load without a paid team identity.
+        com.apple.security.cs.disable-library-validation: true
+    info:
+      path: Sotto/Info.plist
+      properties:
+        CFBundleIconFile: AppIcon
+        CFBundleIconName: AppIcon
+        CFBundleShortVersionString: "$(MARKETING_VERSION)"
+        CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
+        LSMinimumSystemVersion: "14.0"
+        LSUIElement: false
+        # Privacy usage descriptions — must live here so `xcodegen generate`
+        # cannot drop them (build-and-install.sh always regenerates the project).
+        NSMicrophoneUsageDescription: "Sotto needs microphone access to capture your voice for transcription."
+        NSScreenCaptureUsageDescription: "Sotto uses screen capture to read on-screen text for better transcription accuracy."
+        NSAppleEventsUsageDescription: "Sotto uses Apple Events to paste transcribed text into applications."
+        # Sparkle auto-update
+        SUFeedURL: "https://raw.githubusercontent.com/divingsbysangam/sotto/main/appcast.xml"
+        SUPublicEDKey: "armZNzK75/lkaOHLVGsyHptFznONdf2S+vL/hozeSWo="
+        # N15: local automation links (sotto://record/start …). No OAuth: auth was removed.
+        CFBundleURLTypes:
+          - CFBundleURLName: com.divingsbysangam.sotto
+            CFBundleURLSchemes:
+              - sotto
+        # N13: accept audio/video from the Dock and Open With, without becoming the default app.
+        CFBundleDocumentTypes:
+          - CFBundleTypeName: Audio or Video Recording
+            CFBundleTypeRole: Viewer
+            LSHandlerRank: Alternate
+            LSItemContentTypes:
+              - public.audio
+              - public.movie
+        # Right-click › Services › "Add to Sotto Vocabulary" for selected text
+        # (VocabularyServiceProvider, registered at launch).
+        NSServices:
+          - NSMenuItem:
+              default: "Add to Sotto Vocabulary"
+            NSMessage: addToVocabulary
+            NSPortName: Sotto
+            NSSendTypes:
+              - public.utf8-plain-text
+              - NSStringPboardType
+
+  # L14: local read-only CLI over history (`sotto history last|search`), plus the L6 agent hook.
+  sotto-cli:
+    type: tool
+    platform: macOS
+    sources:
+      - path: SottoCLI
+      # L6: the relay's file protocol, shared with the app.
+      - path: Sotto/Services/AgentRelayProtocol.swift
+    settings:
+      base:
+        PRODUCT_NAME: sotto
+        PRODUCT_MODULE_NAME: SottoCLI
+        PRODUCT_BUNDLE_IDENTIFIER: com.divingsbysangam.sotto.cli
+        SWIFT_VERSION: "5.9"
+        MACOSX_DEPLOYMENT_TARGET: "14.0"
+        ENABLE_HARDENED_RUNTIME: YES
+        CODE_SIGN_STYLE: Automatic
+        DEVELOPMENT_TEAM: ""
+        SKIP_INSTALL: YES
+
+  SottoTests:
+    type: bundle.unit-test
+    platform: macOS
+    sources:
+      - path: SottoTests
+    dependencies:
+      - target: Sotto
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.divingsbysangam.sotto.tests
+        GENERATE_INFOPLIST_FILE: YES
+        SWIFT_VERSION: "5.9"
+
+  # Test-only command-line probe; not a dependency of Sotto and never installed with it.
+  SottoSpeechProbe:
+    type: tool
+    platform: macOS
+    sources:
+      - path: SottoSpeechProbe
+      - path: Sotto/Services/AudioSampleReader.swift
+      - path: Sotto/Services/SpeechRuntime.swift
+      - path: Sotto/Services/SpeechModelStore.swift
+      - path: Sotto/Services/ParakeetTranscriptionService.swift
+      - path: Sotto/Services/CohereTranscriptionService.swift
+    dependencies:
+      - package: FluidAudio
+      - package: MLXAudio
+        product: MLXAudioSTT
+      - package: MLX
+        product: MLX
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.divingsbysangam.sotto.speech-probe
+        SWIFT_VERSION: "5.9"
+        SKIP_INSTALL: YES
+
+schemes:
+  SottoSpeechProbe:
+    build:
+      targets:
+        SottoSpeechProbe: all
+  Sotto:
+    build:
+      targets:
+        Sotto: all
+    test:
+      environmentVariables:
+        SOTTO_TESTING: "1"
+        SOTTO_REDESIGN_CAPTURE_DIR: "$(SOTTO_REDESIGN_CAPTURE_DIR)"
+        SOTTO_ASR_BENCHMARK_DIR: "$(SOTTO_ASR_BENCHMARK_DIR)"
+      targets:
+        - SottoTests

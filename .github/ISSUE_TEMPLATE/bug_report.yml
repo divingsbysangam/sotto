@@ -1,0 +1,67 @@
+name: Bug report
+description: Something in Sotto isn't working
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the report. Please don't paste real transcripts, audio, or screenshots with personal text. Describe the problem instead.
+        Security problems: use [private reporting](https://github.com/divingsbysangam/sotto/security/advisories/new), not this form.
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: What did you do, what did you expect, and what happened instead?
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Open ...
+        2. Hold the dictation key ...
+        3. ...
+    validations:
+      required: true
+  - type: input
+    id: sotto-version
+    attributes:
+      label: Sotto version
+      description: Help → About Sotto
+      placeholder: "2.0 (13)"
+    validations:
+      required: true
+  - type: input
+    id: macos-version
+    attributes:
+      label: macOS version and Mac model
+      placeholder: "macOS 26.1, MacBook Pro M3, 16 GB"
+    validations:
+      required: true
+  - type: dropdown
+    id: engine
+    attributes:
+      label: Speech engine
+      options:
+        - Whisper Large v3 Turbo (default)
+        - Parakeet TDT v3
+        - Cohere Transcribe
+        - Not sure / not related
+    validations:
+      required: true
+  - type: dropdown
+    id: cleanup
+    attributes:
+      label: Text cleanup
+      options:
+        - Apple Foundation Models
+        - Local cleanup model
+        - Built-in rule-based cleaner
+        - AI Enhancement is off
+        - Not sure
+  - type: textarea
+    id: extra
+    attributes:
+      label: Anything else
+      description: Which app you were dictating into, which permissions are granted, relevant Console.app lines (Sotto logs lengths, not content).

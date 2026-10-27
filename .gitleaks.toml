@@ -1,0 +1,9 @@
+title = "Sotto gitleaks config"
+
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "Sparkle SUPublicEDKey is a public verification key, safe to publish"
+regexTarget = "line"
+regexes = ['''SUPublicEDKey''']

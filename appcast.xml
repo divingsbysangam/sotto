@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0" xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle" xmlns:dc="http://purl.org/dc/elements/1.1/">
+  <channel>
+    <title>Sotto Updates</title>
+    <link>https://github.com/divingsbysangam/sotto</link>
+    <description>Most recent updates to Sotto</description>
+    <language>en</language>
+    <item>
+      <title>Version 2.0</title>
+      <description><![CDATA[
+        <h2>Sotto 2.0</h2>
+<p>First public release for Apple silicon Macs running macOS 14 or later.</p>
+<ul>
+  <li>Redesigned native interface with a separate Dot near writing listener.</li>
+  <li>Local Whisper Turbo dictation and optional Parakeet and Cohere speech engines.</li>
+  <li>On-device cleanup, transcript history, App Modes, Vocabulary and Scratchpad.</li>
+</ul>
+<p>No account, hosted inference, analytics or telemetry. The self-signed app is not notarized; Control-click and choose Open on first launch.</p>
+      ]]></description>
+      <pubDate>Tue, 27 Oct 2026 18:43:30 GMT</pubDate>
+      <sparkle:version>13</sparkle:version>
+      <sparkle:shortVersionString>2.0</sparkle:shortVersionString>
+      <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+      <enclosure url="https://github.com/divingsbysangam/sotto/releases/download/v2.0/Sotto.zip"
+                 sparkle:edSignature="XLsju2Or+CrDrePsd6ksxfenxVxG+YUeEgcrAUKgeB3S7fVjZrgZTdv8ILxODJTKbXUpdWva6XW9I6JNrB4kCg=="
+                 length="26244835"
+                 type="application/octet-stream"/>
+    </item>
+  </channel>
+</rss>
