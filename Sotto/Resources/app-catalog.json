@@ -1,0 +1,200 @@
+{
+  "version": 1,
+  "about": "Apps and sites by category, for matching App Modes when the user hasn't listed an app. Add entries freely: bundle IDs are exact, domains match the host or any subdomain.",
+  "categories": {
+    "email": {
+      "apps": [
+        { "id": "com.apple.mail", "name": "Mail" },
+        { "id": "com.microsoft.Outlook", "name": "Microsoft Outlook" },
+        { "id": "com.readdle.smartemail-Mac", "name": "Spark" },
+        { "id": "com.readdle.SparkDesktop", "name": "Spark Desktop" },
+        { "id": "it.bloop.airmail2", "name": "Airmail" },
+        { "id": "com.superhuman.electron", "name": "Superhuman" },
+        { "id": "com.mimestream.Mimestream", "name": "Mimestream" },
+        { "id": "com.freron.MailMate", "name": "MailMate" },
+        { "id": "org.mozilla.thunderbird", "name": "Thunderbird" },
+        { "id": "io.canarymail.mac", "name": "Canary Mail" },
+        { "id": "com.postbox-inc.postbox", "name": "Postbox" },
+        { "id": "ch.protonmail.desktop", "name": "Proton Mail" },
+        { "id": "com.hey.app.desktop", "name": "HEY" },
+        { "id": "com.missiveapp.osx", "name": "Missive" },
+        { "id": "com.newtonhq.newton", "name": "Newton" },
+        { "id": "com.fastmail.mac.Fastmail", "name": "Fastmail" },
+        { "id": "com.edisonmail.edisonmail", "name": "Edison Mail" },
+        { "id": "com.front.desktop", "name": "Front" }
+      ],
+      "domains": [
+        "mail.google.com", "outlook.live.com", "outlook.office.com", "outlook.office365.com",
+        "mail.yahoo.com", "mail.proton.me", "app.fastmail.com", "app.hey.com",
+        "mail.superhuman.com", "mail.zoho.com", "icloud.com/mail", "mail.aol.com"
+      ]
+    },
+    "chat": {
+      "apps": [
+        { "id": "com.tinyspeck.slackmacgap", "name": "Slack" },
+        { "id": "com.hnc.Discord", "name": "Discord" },
+        { "id": "com.microsoft.teams2", "name": "Microsoft Teams" },
+        { "id": "com.microsoft.teams", "name": "Microsoft Teams (classic)" },
+        { "id": "us.zoom.xos", "name": "zoom.us" },
+        { "id": "com.google.Chat", "name": "Google Chat" },
+        { "id": "im.riot.app", "name": "Element" },
+        { "id": "com.mattermost.desktop", "name": "Mattermost" },
+        { "id": "chat.rocket", "name": "Rocket.Chat" },
+        { "id": "com.linear", "name": "Linear" },
+        { "id": "com.webex.meetingmanager", "name": "Webex" },
+        { "id": "com.twist.mac", "name": "Twist" },
+        { "id": "com.basecamp.bc3-mac", "name": "Basecamp" }
+      ],
+      "domains": [
+        "slack.com", "discord.com", "teams.microsoft.com", "teams.live.com", "chat.google.com",
+        "app.element.io", "linear.app", "twist.com", "3.basecamp.com"
+      ]
+    },
+    "messaging": {
+      "apps": [
+        { "id": "com.apple.MobileSMS", "name": "Messages" },
+        { "id": "net.whatsapp.WhatsApp", "name": "WhatsApp" },
+        { "id": "desktop.WhatsApp", "name": "WhatsApp (legacy)" },
+        { "id": "ru.keepcoder.Telegram", "name": "Telegram" },
+        { "id": "org.telegram.desktop", "name": "Telegram Desktop" },
+        { "id": "org.whispersystems.signal-desktop", "name": "Signal" },
+        { "id": "com.facebook.archon", "name": "Messenger" },
+        { "id": "com.viber.osx", "name": "Viber" },
+        { "id": "com.skype.skype", "name": "Skype" },
+        { "id": "jp.naver.line.mac", "name": "LINE" },
+        { "id": "com.tencent.xinWeChat", "name": "WeChat" },
+        { "id": "com.beeper.beeper-desktop", "name": "Beeper" },
+        { "id": "com.kakao.KakaoTalkMac", "name": "KakaoTalk" },
+        { "id": "com.wire.osx", "name": "Wire" },
+        { "id": "com.threema.threema-desktop", "name": "Threema" }
+      ],
+      "domains": [
+        "web.whatsapp.com", "web.telegram.org", "messenger.com", "messages.google.com",
+        "instagram.com/direct", "app.signal.org", "web.skype.com"
+      ]
+    },
+    "code": {
+      "apps": [
+        { "id": "com.apple.dt.Xcode", "name": "Xcode" },
+        { "id": "com.microsoft.VSCode", "name": "Visual Studio Code" },
+        { "id": "com.microsoft.VSCodeInsiders", "name": "Visual Studio Code - Insiders" },
+        { "id": "com.vscodium", "name": "VSCodium" },
+        { "id": "com.sublimetext.4", "name": "Sublime Text" },
+        { "id": "com.sublimetext.3", "name": "Sublime Text 3" },
+        { "id": "com.panic.Nova", "name": "Nova" },
+        { "id": "com.barebones.bbedit", "name": "BBEdit" },
+        { "id": "com.jetbrains.intellij", "name": "IntelliJ IDEA" },
+        { "id": "com.jetbrains.intellij.ce", "name": "IntelliJ IDEA CE" },
+        { "id": "com.jetbrains.pycharm", "name": "PyCharm" },
+        { "id": "com.jetbrains.pycharm.ce", "name": "PyCharm CE" },
+        { "id": "com.jetbrains.WebStorm", "name": "WebStorm" },
+        { "id": "com.jetbrains.goland", "name": "GoLand" },
+        { "id": "com.jetbrains.rider", "name": "Rider" },
+        { "id": "com.jetbrains.CLion", "name": "CLion" },
+        { "id": "com.jetbrains.PhpStorm", "name": "PhpStorm" },
+        { "id": "com.jetbrains.rubymine", "name": "RubyMine" },
+        { "id": "com.jetbrains.datagrip", "name": "DataGrip" },
+        { "id": "com.jetbrains.fleet", "name": "Fleet" },
+        { "id": "com.google.android.studio", "name": "Android Studio" },
+        { "id": "dev.zed.Zed", "name": "Zed" },
+        { "id": "dev.zed.Zed-Preview", "name": "Zed Preview" },
+        { "id": "com.exafunction.windsurf", "name": "Windsurf" },
+        { "id": "com.github.GitHubClient", "name": "GitHub Desktop" },
+        { "id": "com.fournova.Tower3", "name": "Tower" },
+        { "id": "com.axosoft.gitkraken", "name": "GitKraken" },
+        { "id": "com.torusknot.SourceTreeNotMAS", "name": "Sourcetree" },
+        { "id": "com.postmanlabs.mac", "name": "Postman" },
+        { "id": "com.tinyapp.TablePlus", "name": "TablePlus" },
+        { "id": "org.vim.MacVim", "name": "MacVim" },
+        { "id": "org.gnu.Emacs", "name": "Emacs" },
+        { "id": "com.coteditor.CotEditor", "name": "CotEditor" }
+      ],
+      "domains": [
+        "github.com", "gitlab.com", "bitbucket.org", "stackoverflow.com", "stackexchange.com",
+        "codepen.io", "codesandbox.io", "stackblitz.com", "replit.com", "vscode.dev", "github.dev"
+      ]
+    },
+    "terminal": {
+      "apps": [
+        { "id": "com.apple.Terminal", "name": "Terminal" },
+        { "id": "com.googlecode.iterm2", "name": "iTerm" },
+        { "id": "dev.warp.Warp-Stable", "name": "Warp" },
+        { "id": "com.mitchellh.ghostty", "name": "Ghostty" },
+        { "id": "net.kovidgoyal.kitty", "name": "kitty" },
+        { "id": "org.alacritty", "name": "Alacritty" },
+        { "id": "com.github.wez.wezterm", "name": "WezTerm" },
+        { "id": "co.zeit.hyper", "name": "Hyper" },
+        { "id": "org.tabby", "name": "Tabby" },
+        { "id": "com.termius-dmg.mac", "name": "Termius" }
+      ],
+      "domains": []
+    },
+    "notes": {
+      "apps": [
+        { "id": "com.apple.Notes", "name": "Notes" },
+        { "id": "notion.id", "name": "Notion" },
+        { "id": "md.obsidian", "name": "Obsidian" },
+        { "id": "net.shinyfrog.bear", "name": "Bear" },
+        { "id": "com.evernote.Evernote", "name": "Evernote" },
+        { "id": "com.microsoft.onenote.mac", "name": "Microsoft OneNote" },
+        { "id": "com.agiletortoise.Drafts-OSX", "name": "Drafts" },
+        { "id": "com.lukilabs.lukiapp", "name": "Craft" },
+        { "id": "com.logseq.logseq", "name": "Logseq" },
+        { "id": "com.apple.reminders", "name": "Reminders" },
+        { "id": "com.culturedcode.ThingsMac", "name": "Things" },
+        { "id": "com.todoist.mac.Todoist", "name": "Todoist" },
+        { "id": "com.omnigroup.OmniFocus3", "name": "OmniFocus" },
+        { "id": "com.reflect.ReflectDesktop", "name": "Reflect" },
+        { "id": "com.capacities.app", "name": "Capacities" },
+        { "id": "com.anytype.anytype", "name": "Anytype" },
+        { "id": "com.goodnotesapp.x", "name": "GoodNotes" },
+        { "id": "com.apple.freeform", "name": "Freeform" }
+      ],
+      "domains": [
+        "notion.so", "notion.site", "keep.google.com", "evernote.com", "onenote.com",
+        "craft.do", "app.todoist.com", "todoist.com", "logseq.com", "roamresearch.com"
+      ]
+    },
+    "docs": {
+      "apps": [
+        { "id": "com.apple.iWork.Pages", "name": "Pages" },
+        { "id": "com.apple.iWork.Keynote", "name": "Keynote" },
+        { "id": "com.apple.iWork.Numbers", "name": "Numbers" },
+        { "id": "com.microsoft.Word", "name": "Microsoft Word" },
+        { "id": "com.microsoft.Powerpoint", "name": "Microsoft PowerPoint" },
+        { "id": "com.microsoft.Excel", "name": "Microsoft Excel" },
+        { "id": "com.apple.TextEdit", "name": "TextEdit" },
+        { "id": "com.ulyssesapp.mac", "name": "Ulysses" },
+        { "id": "com.literatureandlatte.scrivener3", "name": "Scrivener" },
+        { "id": "abnerworks.Typora", "name": "Typora" },
+        { "id": "com.iawriter.mac", "name": "iA Writer" },
+        { "id": "com.figma.Desktop", "name": "Figma" },
+        { "id": "com.adobe.Acrobat.Pro", "name": "Adobe Acrobat" },
+        { "id": "com.google.drivefs", "name": "Google Drive" }
+      ],
+      "domains": [
+        "docs.google.com", "slides.google.com", "sheets.google.com", "coda.io", "quip.com",
+        "dropbox.com/paper", "office.com", "onedrive.live.com", "figma.com", "canva.com",
+        "medium.com/new-story", "substack.com"
+      ]
+    },
+    "ai-chat": {
+      "apps": [
+        { "id": "com.openai.chat", "name": "ChatGPT" },
+        { "id": "com.anthropic.claudefordesktop", "name": "Claude" },
+        { "id": "com.todesktop.230313mzl4w4u92", "name": "Cursor" },
+        { "id": "ai.perplexity.mac", "name": "Perplexity" },
+        { "id": "com.openai.codex", "name": "Codex" },
+        { "id": "ai.elementlabs.lmstudio", "name": "LM Studio" },
+        { "id": "com.electron.ollama", "name": "Ollama" },
+        { "id": "com.msty.app", "name": "Msty" },
+        { "id": "com.boltai.BoltAI", "name": "BoltAI" }
+      ],
+      "domains": [
+        "chatgpt.com", "chat.openai.com", "claude.ai", "gemini.google.com", "perplexity.ai",
+        "poe.com", "chat.mistral.ai", "copilot.microsoft.com", "chat.deepseek.com",
+        "grok.com", "aistudio.google.com", "v0.dev", "lovable.dev", "bolt.new"
+      ]
+    }
+  }
+}

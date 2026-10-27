@@ -1,0 +1,81 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-test:
+    name: Build and test
+    # macos-26 (Apple silicon) ships Xcode 26. macos-14 can't run Xcode 26.
+    runs-on: macos-26
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Show toolchain
+        run: |
+          xcodebuild -version
+          swift --version
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Install the Metal toolchain
+        # mlx-swift compiles Metal kernels. Xcode 26 downloads the toolchain separately.
+        run: xcrun metal --version >/dev/null 2>&1 || xcodebuild -downloadComponent MetalToolchain
+
+      - name: Cache Swift packages
+        uses: actions/cache@v6
+        with:
+          path: build/DerivedData/SourcePackages
+          key: spm-${{ runner.os }}-${{ hashFiles('**/Package.resolved', 'project.yml') }}
+          restore-keys: spm-${{ runner.os }}-
+
+      - name: Build and test (unsigned)
+        # Same script contributors run locally: it generates the project, then builds and tests.
+        env:
+          RESULT_BUNDLE_PATH: build/TestResults.xcresult
+        run: ./scripts/build.sh test
+
+      - name: Upload test results
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: test-results
+          path: build/TestResults.xcresult
+          retention-days: 7
+
+  secret-scan:
+    name: Secret scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Install gitleaks
+        env:
+          GITLEAKS_VERSION: 8.30.1
+          GITLEAKS_SHA256: 551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb
+        run: |
+          curl -sSfL -o gitleaks.tar.gz \
+            "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz"
+          echo "${GITLEAKS_SHA256}  gitleaks.tar.gz" | sha256sum -c -
+          tar -xzf gitleaks.tar.gz gitleaks
+          sudo install -m 0755 gitleaks /usr/local/bin/gitleaks
+
+      - name: Scan git history
+        run: gitleaks git . --config .gitleaks.toml --redact --verbose
+
+      - name: Scan working tree
+        run: gitleaks dir . --config .gitleaks.toml --redact --verbose

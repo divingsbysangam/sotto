@@ -1,0 +1,46 @@
+# Xcode
+*.xcodeproj/xcuserdata/
+*.xcodeproj/project.xcworkspace/xcuserdata/
+*.xcworkspace/xcuserdata/
+DerivedData/
+*.moved-aside
+*.pbxuser
+!default.pbxuser
+*.mode1v3
+!default.mode1v3
+*.mode2v3
+!default.mode2v3
+*.perspectivev3
+!default.perspectivev3
+xcuserdata/
+
+# Swift Package Manager
+.build/
+.swiftpm/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Sparkle private key (NEVER commit this!)
+sparkle_private_key
+*.pem
+
+# Temporary files
+*.tmp
+*.temp
+
+# Conductor machine-local settings
+.conductor/settings.local.toml
+
+# Local Conductor workspace settings (maintainer-only)
+.conductor/
+
+# Local build output and scratch space
+build/
+.context/
+
+# Maintainer-only local overrides (see scripts/build-and-install.sh)
+.sotto-local.env

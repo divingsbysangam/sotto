@@ -1,0 +1,264 @@
+{
+  "engines": {
+    "parakeet": [
+      {
+        "repository": "FluidInference/parakeet-tdt-0.6b-v3-coreml",
+        "revision": "7dd20fe6b1797d35f5e3307e8b1732d9a178edfe",
+        "remotePath": "Decoder.mlmodelc/analytics/coremldata.bin",
+        "path": "Decoder.mlmodelc/analytics/coremldata.bin",
+        "size": 243,
+        "sha256": "4238c4e81ecd0dc94bd7dfbb60f7e2cc824107c1ffe0387b8607b72833dba350"
+      },
+      {
+        "repository": "FluidInference/parakeet-tdt-0.6b-v3-coreml",
+        "revision": "7dd20fe6b1797d35f5e3307e8b1732d9a178edfe",
+        "remotePath": "Decoder.mlmodelc/coremldata.bin",
+        "path": "Decoder.mlmodelc/coremldata.bin",
+        "size": 554,
+        "sha256": "18647af085d87bd8f3121c8a9b4d4564c1ede038dab63d295b4e745cf2d7fb99"
+      },
+      {
+        "repository": "FluidInference/parakeet-tdt-0.6b-v3-coreml",
+        "revision": "7dd20fe6b1797d35f5e3307e8b1732d9a178edfe",
+        "remotePath": "Decoder.mlmodelc/metadata.json",
+        "path": "Decoder.mlmodelc/metadata.json",
+        "size": 3427,
+        "sha256": "a39e93cd8371b8ded92635c7804fcd0590f0d1dd9415c6d19a0484be073077d9"
+      },
+      {
+        "repository": "FluidInference/parakeet-tdt-0.6b-v3-coreml",
+        "revision": "7dd20fe6b1797d35f5e3307e8b1732d9a178edfe",
+        "remotePath": "Decoder.mlmodelc/model.mil",
+        "path": "Decoder.mlmodelc/model.mil",
+        "size": 13110,
+        "sha256": "ef2a0a281695398a62fde86ac269c68f73d5b578d7ed3b31f2ba91a2d1ea1f35"
+      },
+      {
+        "repository": "FluidInference/parakeet-tdt-0.6b-v3-coreml",
+        "revision": "7dd20fe6b1797d35f5e3307e8b1732d9a178edfe",
+        "remotePath": "Decoder.mlmodelc/weights/weight.bin",
+        "path": "Decoder.mlmodelc/weights/weight.bin",
+        "size": 23604992,
+        "sha256": "48adf0f0d47c406c8253d4f7fef967436a39da14f5a65e66d5a4b407be355d41"
+      },
+      {
+        "repository": "FluidInference/parakeet-tdt-0.6b-v3-coreml",
+        "revision": "7dd20fe6b1797d35f5e3307e8b1732d9a178edfe",
+        "remotePath": "Encoder.mlmodelc/analytics/coremldata.bin",
+        "path": "Encoder.mlmodelc/analytics/coremldata.bin",
+        "size": 243,
+        "sha256": "42e638870d73f26b332918a3496ce36793fbb413a81cbd3d16ba01328637a105"
+      },
+      {
+        "repository": "FluidInference/parakeet-tdt-0.6b-v3-coreml",
+        "revision": "7dd20fe6b1797d35f5e3307e8b1732d9a178edfe",
+        "remotePath": "Encoder.mlmodelc/coremldata.bin",
+        "path": "Encoder.mlmodelc/coremldata.bin",
+        "size": 485,
+        "sha256": "d48034a167a82e88fc3df64f60af963ab3983538271175b8319e7d5720a0fb86"
+      },
+      {
+        "repository": "FluidInference/parakeet-tdt-0.6b-v3-coreml",
+        "revision": "7dd20fe6b1797d35f5e3307e8b1732d9a178edfe",
+        "remotePath": "Encoder.mlmodelc/metadata.json",
+        "path": "Encoder.mlmodelc/metadata.json",
+        "size": 2921,
+        "sha256": "da24da9cca943fb29d7fa8e376d57fca7cb3aa08ca51b956b0b0e56813f087e9"
+      },
+      {
+        "repository": "FluidInference/parakeet-tdt-0.6b-v3-coreml",
+        "revision": "7dd20fe6b1797d35f5e3307e8b1732d9a178edfe",
+        "remotePath": "Encoder.mlmodelc/model.mil",
+        "path": "Encoder.mlmodelc/model.mil",
+        "size": 959769,
+        "sha256": "ed7b19156ca29fa7dfd6891deb9fda4b0e8893f68597c985d135736546a43808"
+      },
+      {
+        "repository": "FluidInference/parakeet-tdt-0.6b-v3-coreml",
+        "revision": "7dd20fe6b1797d35f5e3307e8b1732d9a178edfe",
+        "remotePath": "Encoder.mlmodelc/weights/weight.bin",
+        "path": "Encoder.mlmodelc/weights/weight.bin",
+        "size": 445187200,
+        "sha256": "e2020f323703477a5b21d7c2d282c403e371afb5962e79877e3033e73ba6f421"
+      },
+      {
+        "repository": "FluidInference/parakeet-tdt-0.6b-v3-coreml",
+        "revision": "7dd20fe6b1797d35f5e3307e8b1732d9a178edfe",
+        "remotePath": "JointDecisionv3.mlmodelc/analytics/coremldata.bin",
+        "path": "JointDecisionv3.mlmodelc/analytics/coremldata.bin",
+        "size": 243,
+        "sha256": "26def4bf73dd56d29dee21c8ef97cb8969e62f6120ed1adc91e46828e2737b6c"
+      },
+      {
+        "repository": "FluidInference/parakeet-tdt-0.6b-v3-coreml",
+        "revision": "7dd20fe6b1797d35f5e3307e8b1732d9a178edfe",
+        "remotePath": "JointDecisionv3.mlmodelc/coremldata.bin",
+        "path": "JointDecisionv3.mlmodelc/coremldata.bin",
+        "size": 521,
+        "sha256": "f5fc08b741400f0088492c9e839418b1e18522f19cba28d361dd030c5f398342"
+      },
+      {
+        "repository": "FluidInference/parakeet-tdt-0.6b-v3-coreml",
+        "revision": "7dd20fe6b1797d35f5e3307e8b1732d9a178edfe",
+        "remotePath": "JointDecisionv3.mlmodelc/metadata.json",
+        "path": "JointDecisionv3.mlmodelc/metadata.json",
+        "size": 3453,
+        "sha256": "d9307211b9a37e0f0ac260c7660b1571a3de25841035cfdf9b58fd40425f890f"
+      },
+      {
+        "repository": "FluidInference/parakeet-tdt-0.6b-v3-coreml",
+        "revision": "7dd20fe6b1797d35f5e3307e8b1732d9a178edfe",
+        "remotePath": "JointDecisionv3.mlmodelc/model.mil",
+        "path": "JointDecisionv3.mlmodelc/model.mil",
+        "size": 11775,
+        "sha256": "be60732943389a047175111a83f8839f3eb39d4803adafa828a0871b2f39818d"
+      },
+      {
+        "repository": "FluidInference/parakeet-tdt-0.6b-v3-coreml",
+        "revision": "7dd20fe6b1797d35f5e3307e8b1732d9a178edfe",
+        "remotePath": "JointDecisionv3.mlmodelc/weights/weight.bin",
+        "path": "JointDecisionv3.mlmodelc/weights/weight.bin",
+        "size": 12642764,
+        "sha256": "4e0e63d840032f7f07ddb1d64446051166281e5491bf22da8a945c41f6eedb3e"
+      },
+      {
+        "repository": "FluidInference/parakeet-tdt-0.6b-v3-coreml",
+        "revision": "7dd20fe6b1797d35f5e3307e8b1732d9a178edfe",
+        "remotePath": "Preprocessor.mlmodelc/analytics/coremldata.bin",
+        "path": "Preprocessor.mlmodelc/analytics/coremldata.bin",
+        "size": 243,
+        "sha256": "c9beeb989c8d66f8be11df59bc6df277ec76cee404f6865b46243835ef562f6d"
+      },
+      {
+        "repository": "FluidInference/parakeet-tdt-0.6b-v3-coreml",
+        "revision": "7dd20fe6b1797d35f5e3307e8b1732d9a178edfe",
+        "remotePath": "Preprocessor.mlmodelc/coremldata.bin",
+        "path": "Preprocessor.mlmodelc/coremldata.bin",
+        "size": 486,
+        "sha256": "dbde3f2300842c1fd51ef3ff948a0bcffe65ffd2dca10707f2509f32c1d65b1d"
+      },
+      {
+        "repository": "FluidInference/parakeet-tdt-0.6b-v3-coreml",
+        "revision": "7dd20fe6b1797d35f5e3307e8b1732d9a178edfe",
+        "remotePath": "Preprocessor.mlmodelc/metadata.json",
+        "path": "Preprocessor.mlmodelc/metadata.json",
+        "size": 2841,
+        "sha256": "2a98699e22d279dd37fa1d238aeb1c6db1df0d6fad687775324157689d8f3acf"
+      },
+      {
+        "repository": "FluidInference/parakeet-tdt-0.6b-v3-coreml",
+        "revision": "7dd20fe6b1797d35f5e3307e8b1732d9a178edfe",
+        "remotePath": "Preprocessor.mlmodelc/model.mil",
+        "path": "Preprocessor.mlmodelc/model.mil",
+        "size": 28181,
+        "sha256": "4b8518a956450fec57f06c2a21bdffc26973f7f1fa6842fb38fe917f896b6b93"
+      },
+      {
+        "repository": "FluidInference/parakeet-tdt-0.6b-v3-coreml",
+        "revision": "7dd20fe6b1797d35f5e3307e8b1732d9a178edfe",
+        "remotePath": "Preprocessor.mlmodelc/weights/weight.bin",
+        "path": "Preprocessor.mlmodelc/weights/weight.bin",
+        "size": 491072,
+        "sha256": "129b76e3aeafa8afa3ea76d995b964b145fe83700d579f6ff42c4c38fa0968ea"
+      },
+      {
+        "repository": "FluidInference/parakeet-tdt-0.6b-v3-coreml",
+        "revision": "7dd20fe6b1797d35f5e3307e8b1732d9a178edfe",
+        "remotePath": "parakeet_vocab.json",
+        "path": "parakeet_vocab.json",
+        "size": 151122,
+        "sha256": "7ec60e05f1b24480736ec0eed40900f4626bce1fa9a60fd700ec7e2a59198735"
+      },
+      {
+        "repository": "FluidInference/silero-vad-coreml",
+        "revision": "b419383c55c110e2c9271fa6ee0ea83d03c70d96",
+        "remotePath": "silero-vad-unified-256ms-v6.2.1.mlmodelc/analytics/coremldata.bin",
+        "path": "VAD/silero-vad-unified-256ms-v6.2.1.mlmodelc/analytics/coremldata.bin",
+        "size": 243,
+        "sha256": "8067594eb3126ab8318af507f0c00cabfed40d5fedb8a0ee5075dd02e903d909"
+      },
+      {
+        "repository": "FluidInference/silero-vad-coreml",
+        "revision": "b419383c55c110e2c9271fa6ee0ea83d03c70d96",
+        "remotePath": "silero-vad-unified-256ms-v6.2.1.mlmodelc/coremldata.bin",
+        "path": "VAD/silero-vad-unified-256ms-v6.2.1.mlmodelc/coremldata.bin",
+        "size": 625,
+        "sha256": "7db35a4fd995222a7fb0129713473b15d1462572ab4a2e5e4d56bcaad9e40f41"
+      },
+      {
+        "repository": "FluidInference/silero-vad-coreml",
+        "revision": "b419383c55c110e2c9271fa6ee0ea83d03c70d96",
+        "remotePath": "silero-vad-unified-256ms-v6.2.1.mlmodelc/metadata.json",
+        "path": "VAD/silero-vad-unified-256ms-v6.2.1.mlmodelc/metadata.json",
+        "size": 3335,
+        "sha256": "2740be542c611e1ba358e1849b4e265c65cdf0b17192767e1e5de86a31ac94d6"
+      },
+      {
+        "repository": "FluidInference/silero-vad-coreml",
+        "revision": "b419383c55c110e2c9271fa6ee0ea83d03c70d96",
+        "remotePath": "silero-vad-unified-256ms-v6.2.1.mlmodelc/model.mil",
+        "path": "VAD/silero-vad-unified-256ms-v6.2.1.mlmodelc/model.mil",
+        "size": 176918,
+        "sha256": "c6a9d1bf22d413265da0a07a1d14151c3ea2fad296b3aa5859275b33ef1c3270"
+      },
+      {
+        "repository": "FluidInference/silero-vad-coreml",
+        "revision": "b419383c55c110e2c9271fa6ee0ea83d03c70d96",
+        "remotePath": "silero-vad-unified-256ms-v6.2.1.mlmodelc/weights/weight.bin",
+        "path": "VAD/silero-vad-unified-256ms-v6.2.1.mlmodelc/weights/weight.bin",
+        "size": 882304,
+        "sha256": "53ecc8b5081146140ab654c89109cf001f2183abddd7a2411c5081feeffff063"
+      }
+    ],
+    "cohere": [
+      {
+        "repository": "davidalarrea/cohere-transcribe-03-2026-mlx-4bit",
+        "revision": "fedd1c83571341374f34525096e5ef67ebcdcfcc",
+        "remotePath": "config.json",
+        "path": "config.json",
+        "size": 4336,
+        "sha256": "f5f4e46ea8a74e4e868d08504cb212afca7abfe55cd900d9b677bb2f9a1c210b"
+      },
+      {
+        "repository": "davidalarrea/cohere-transcribe-03-2026-mlx-4bit",
+        "revision": "fedd1c83571341374f34525096e5ef67ebcdcfcc",
+        "remotePath": "model.safetensors",
+        "path": "model.safetensors",
+        "size": 1505114042,
+        "sha256": "5284ab5b678da720da092604323c7ce82cffe544e42b2da95064fbc85e281609"
+      },
+      {
+        "repository": "davidalarrea/cohere-transcribe-03-2026-mlx-4bit",
+        "revision": "fedd1c83571341374f34525096e5ef67ebcdcfcc",
+        "remotePath": "preprocessor_config.json",
+        "path": "preprocessor_config.json",
+        "size": 420,
+        "sha256": "9f297d330646ecc8ebb9dc5784f48b7c35b118c913e306a1ccd0192f2c976332"
+      },
+      {
+        "repository": "davidalarrea/cohere-transcribe-03-2026-mlx-4bit",
+        "revision": "fedd1c83571341374f34525096e5ef67ebcdcfcc",
+        "remotePath": "special_tokens_map.json",
+        "path": "special_tokens_map.json",
+        "size": 4091,
+        "sha256": "1814ce01458ff6a72b04a6618e75f18ce627be4dc17619cd3a7cd7f71e137f0f"
+      },
+      {
+        "repository": "davidalarrea/cohere-transcribe-03-2026-mlx-4bit",
+        "revision": "fedd1c83571341374f34525096e5ef67ebcdcfcc",
+        "remotePath": "tokenizer.model",
+        "path": "tokenizer.model",
+        "size": 492827,
+        "sha256": "6d21e6a83b2d0d3e1241a7817e4bef8eb63bcb7cfe4a2675af9a35ff3bbf0e14"
+      },
+      {
+        "repository": "davidalarrea/cohere-transcribe-03-2026-mlx-4bit",
+        "revision": "fedd1c83571341374f34525096e5ef67ebcdcfcc",
+        "remotePath": "tokenizer_config.json",
+        "path": "tokenizer_config.json",
+        "size": 48141,
+        "sha256": "0dfeb3eeba07bccaa1b4bf78f3135ad3059acf8d18f681675832b285ac0035b0"
+      }
+    ]
+  }
+}
