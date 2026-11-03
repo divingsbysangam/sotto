@@ -1175,7 +1175,7 @@
 			repositoryURL = "https://github.com/ml-explore/mlx-swift";
 			requirement = {
 				kind = exactVersion;
-				version = 0.32.3;
+				version = 0.33.0;
 			};
 		};
 		E5F17F77AB029B4B5A3C932D /* XCRemoteSwiftPackageReference "FluidAudio" */ = {
