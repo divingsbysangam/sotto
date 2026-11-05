@@ -5,18 +5,32 @@ import SwiftUI
 
 struct CursorIndicatorView: View {
     let isProcessing: Bool
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var pulsing = false
+
+    private var status: SottoStatusPresentation {
+        RecordingOverlayStatus.make(isProcessing: isProcessing, message: "")
+    }
 
     var body: some View {
         ZStack {
             if isProcessing {
-                Image(systemName: "ellipsis").font(.system(size: 9, weight: .bold)).foregroundStyle(.secondary)
-            } else {
-                Circle().fill(SottoDesign.accent).frame(width: 8, height: 8)
+                Circle()
+                    .strokeBorder(SottoDesign.accent, lineWidth: SottoDesign.spacing / 8)
+                    .frame(width: SottoDesign.spacing, height: SottoDesign.spacing)
             }
+            Circle()
+                .fill(SottoDesign.accent)
+                .frame(width: SottoDesign.spacing / 2, height: SottoDesign.spacing / 2)
+                .scaleEffect(reduceMotion ? 1 : (pulsing ? 1.05 : 0.8))
+                .opacity(reduceMotion ? 1 : (pulsing ? 1 : 0.7))
+                .animation(reduceMotion ? nil : .easeInOut(duration: SottoDesign.contentDuration * 5).repeatForever(autoreverses: true), value: pulsing)
         }
-            .frame(width: 24, height: 24)
-            .sottoFloatingControls()
-            .accessibilityLabel(isProcessing ? "Preparing transcript" : "Listening")
+        .frame(width: 24, height: 24)
+        .sottoFloatingControls()
+        .accessibilityLabel(status.title)
+        .onAppear { pulsing = !reduceMotion }
+        .onChange(of: reduceMotion) { _, reduced in pulsing = !reduced }
     }
 }
 

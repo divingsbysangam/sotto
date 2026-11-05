@@ -18,11 +18,15 @@ final class FloatingDictationModel: ObservableObject {
     }
 
     struct CountdownKey: Equatable {
-        let state: DictationState
+        let isReadyToPaste: Bool
         let generation: UUID
         let isPresented: Bool
     }
-    var countdownKey: CountdownKey { .init(state: state, generation: generation, isPresented: isPresented) }
+    var countdownKey: CountdownKey {
+        let isReadyToPaste: Bool
+        if case .readyToPaste = state { isReadyToPaste = true } else { isReadyToPaste = false }
+        return .init(isReadyToPaste: isReadyToPaste, generation: generation, isPresented: isPresented)
+    }
 }
 
 struct FloatingDictationView: View {
@@ -32,6 +36,7 @@ struct FloatingDictationView: View {
     let onPasteNow: () -> Void
     @State private var countdown = 3
     @State private var didPaste = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     private var status: SottoStatusPresentation {
         switch model.state {
@@ -42,14 +47,16 @@ struct FloatingDictationView: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            HStack(spacing: 12) {
+        VStack(alignment: .leading, spacing: SottoDesign.spacing) {
+            HStack(spacing: SottoDesign.spacing) {
                 Label(status.title, systemImage: status.symbol)
                     .font(.headline).foregroundStyle(status.color).lineLimit(2)
+                    .id(status.title)
+                    .transition(.opacity)
                 Spacer(minLength: 0)
                 SottoIconButton(symbol: .close, label: "Cancel dictation", action: onCancel)
             }
-            .padding(12)
+            .padding(SottoDesign.spacing)
             .sottoFloatingControls()
             if let mode = model.modeName {
                 Label(mode, systemImage: SottoSymbol.appModes.rawValue)
@@ -69,16 +76,18 @@ struct FloatingDictationView: View {
                 HStack {
                     Text("Pasting in \(countdown)s…").font(.caption).foregroundStyle(.secondary)
                     Spacer()
-                    Button("Paste Now", action: pasteOnce).sottoPrimaryAction()
+                    Button("Paste Now", action: pasteOnce)
+                        .sottoPrimaryAction()
+                        .tint(SottoDesign.accent)
                 }
                 ProgressView(value: Double(countdown), total: 3).accessibilityLabel("Time before paste")
             }
         }
-        .padding(16)
+        .padding(SottoDesign.spacing)
         .frame(width: 320)
-        .background(Color(nsColor: .windowBackgroundColor), in: RoundedRectangle(cornerRadius: 20))
-        .overlay(RoundedRectangle(cornerRadius: 20).strokeBorder(Color.secondary.opacity(0.25)))
-        .tint(SottoDesign.accent)
+        .background(Color(nsColor: .windowBackgroundColor), in: RoundedRectangle(cornerRadius: SottoDesign.cornerRadius))
+        .overlay(RoundedRectangle(cornerRadius: SottoDesign.cornerRadius).strokeBorder(SottoDesign.surfaceBorder))
+        .animation(reduceMotion ? nil : .easeInOut(duration: SottoDesign.contentDuration), value: status.title)
         .task(id: model.countdownKey) {
             countdown = 3
             didPaste = false
