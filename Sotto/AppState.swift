@@ -113,6 +113,7 @@ final class AppState {
     /// Text copied up to this long before recording starts counts as context.
     private static let clipboardContextWindow: TimeInterval = 3
     private var sourceApp: NSRunningApplication?
+    private var sourceWindowScreen: NSScreen?
     private var sourceAppName: String?
     private var sourceAppIdentity: SourceAppIdentity?
     private var sourceWindowTitle: String?
@@ -396,6 +397,7 @@ final class AppState {
         // Capture source app before we start (cursor is in this app).
         // Window title uses Accessibility only — never CGWindowList / Screen Recording APIs.
         sourceApp = NSWorkspace.shared.frontmostApplication
+        sourceWindowScreen = cursorPositionService.focusedWindowScreen(for: sourceApp)
         sourceAppName = sourceApp?.localizedName
         sourceAppIdentity = sourceApp.map { SourceAppIdentity(app: $0) }
         sourceWindowTitle = screenCaptureService.getActiveWindowTitle()
@@ -945,7 +947,7 @@ final class AppState {
         if notchCapsuleWindow == nil {
             notchCapsuleWindow = NotchCapsuleWindow()
         }
-        notchCapsuleWindow?.show(on: position?.screen)
+        notchCapsuleWindow?.show(on: sourceWindowScreen ?? position?.screen)
 
         // Cursor indicator — capture position once at recording start
         if cursorIndicatorWindow == nil {
@@ -1007,7 +1009,7 @@ final class AppState {
                 }
             )
         }
-        floatingWindow?.show(state: .recording, audioLevel: 0)
+        floatingWindow?.show(state: .recording, audioLevel: 0, on: sourceWindowScreen)
     }
 
     // MARK: - Paste
