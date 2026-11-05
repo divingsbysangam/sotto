@@ -91,6 +91,34 @@ struct SottoWindowFooter: View {
     }
 }
 
+struct SottoPageHeader<Actions: View>: View {
+    let title: String
+    let subtitle: String
+    @ViewBuilder let actions: () -> Actions
+
+    var body: some View {
+        HStack(alignment: .center, spacing: SottoDesign.spacing) {
+            VStack(alignment: .leading, spacing: SottoDesign.spacing / 4) {
+                Text(title)
+                    .font(.title2.weight(.semibold))
+                    .foregroundStyle(SottoDesign.cream)
+                    .accessibilityAddTraits(.isHeader)
+                Text(subtitle)
+                    .font(.caption)
+                    .foregroundStyle(SottoDesign.cream.opacity(0.55))
+            }
+            Spacer(minLength: SottoDesign.spacing)
+            actions()
+            Label("Private · On-device", systemImage: "lock")
+                .font(.caption2)
+                .foregroundStyle(SottoDesign.cream.opacity(0.8))
+                .padding(.horizontal, SottoDesign.spacing / 2)
+                .padding(.vertical, SottoDesign.spacing / 3)
+                .background(SottoDesign.cream.opacity(0.06), in: Capsule())
+        }
+    }
+}
+
 private struct TopNavigationGlass: ViewModifier {
     let reduceTransparency: Bool
 

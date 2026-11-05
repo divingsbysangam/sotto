@@ -8,6 +8,7 @@ struct LiveDictationStatusView: View {
     let onNavigate: (SottoRoute) -> Void
     var announcesChanges = false
     var compact = false
+    var dashboard = false
     private let manager = TranscriptionEngineManager.shared
     @State private var microphoneAllowed = AVCaptureDevice.authorizationStatus(for: .audio) == .authorized
     @State private var accessibilityAllowed = AXIsProcessTrusted()
@@ -28,16 +29,22 @@ struct LiveDictationStatusView: View {
 
     var body: some View {
         let state = presentation
-        VStack(alignment: .leading, spacing: 12) {
-            SottoStatusView(status: state.primary.status, onAction: state.primary.route.map { route in
-                { onNavigate(route) }
-            })
-            if let readiness = state.readiness,
-               !compact || readiness.status.actionTitle != nil {
-                Divider()
-                SottoStatusView(status: readiness.status, onAction: readiness.route.map { route in
-                    { onNavigate(route) }
-                })
+        Group {
+            if dashboard {
+                dashboardStatus(state.primary)
+            } else {
+                VStack(alignment: .leading, spacing: 12) {
+                    SottoStatusView(status: state.primary.status, onAction: state.primary.route.map { route in
+                        { onNavigate(route) }
+                    })
+                    if let readiness = state.readiness,
+                       !compact || readiness.status.actionTitle != nil {
+                        Divider()
+                        SottoStatusView(status: readiness.status, onAction: readiness.route.map { route in
+                            { onNavigate(route) }
+                        })
+                    }
+                }
             }
         }
         .task {
@@ -57,6 +64,54 @@ struct LiveDictationStatusView: View {
                 .priority: NSAccessibilityPriorityLevel.medium.rawValue
             ])
         }
+    }
+
+    private func dashboardStatus(_ item: DictationPresentation.Item) -> some View {
+        let status = item.status
+        return HStack(spacing: SottoDesign.spacing / 2) {
+            Group {
+                if status.tone == .ready {
+                    Circle()
+                        .fill(SottoDesign.accent)
+                        .frame(width: 8, height: 8)
+                } else {
+                    Image(systemName: status.symbol)
+                        .foregroundStyle(status.color)
+                }
+            }
+            .frame(width: SottoDesign.spacing)
+            .accessibilityHidden(true)
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text(status.title)
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(SottoDesign.cream)
+                Text(status.detail)
+                    .font(.caption)
+                    .foregroundStyle(SottoDesign.cream.opacity(0.55))
+                    .lineLimit(2)
+            }
+            Spacer(minLength: SottoDesign.spacing)
+
+            if let actionTitle = status.actionTitle, let route = item.route {
+                Button(actionTitle) { onNavigate(route) }
+                    .buttonStyle(.borderless)
+            } else if status.tone == .ready {
+                HStack(spacing: SottoDesign.spacing / 2) {
+                    Text("Hold")
+                    Text(AppSettings.shared.hotkeyDisplayName)
+                        .font(.system(.caption2, design: .monospaced))
+                        .padding(.horizontal, SottoDesign.spacing / 4)
+                        .background(SottoDesign.cream.opacity(0.08), in: RoundedRectangle(cornerRadius: 4))
+                    Text("to dictate")
+                    Divider().frame(height: SottoDesign.spacing)
+                    Text("Double-tap for hands-free")
+                }
+                .font(.caption)
+                .foregroundStyle(SottoDesign.cream.opacity(0.55))
+            }
+        }
+        .sottoSurface()
     }
 }
 
