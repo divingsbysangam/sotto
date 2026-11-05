@@ -20,13 +20,13 @@ The menu bar popover puts recording, the last transcript, and transcript actions
 
 These are captures of the popover view in a test window with sample transcript text and microphone permission unavailable. The menu bar icon is shown in the brand image above. See [brand assets and capture notes](docs/media/brand/README.md).
 
-![Sotto's recording indicator choices in Settings: Bottom capsule + dot, Dot near writing, and Floating window](docs/media/recording-indicator-options.jpg)
-
 In **Settings → General → Recording Indicator Style**, choose the bottom capsule with a caret dot, a dot beside your writing, or a floating window. The dot-only style follows the active caret or pointer while you dictate.
 
-![The bottom capsule animating between listening and processing states](docs/media/capsule-demo.gif)
+| Bottom capsule | Dot near writing | Floating window |
+|---|---|---|
+| ![Bottom capsule listening in dark appearance](docs/media/ui/capsule-listening-dark.png) | ![Small listening dot in light appearance](docs/media/ui/dot-listening-light.png) | ![Floating dictation window listening in light appearance](docs/media/ui/floating-listening-light.png) |
 
-The capsule demo renders Sotto's SwiftUI view with synthetic audio levels. It contains no recording or personal text.
+These are captures of Sotto's SwiftUI views with sample text and audio levels. They contain no recording or personal text.
 
 ## Get started
 
