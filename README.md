@@ -20,7 +20,7 @@ The menu bar popover puts recording, the last transcript, and transcript actions
 
 These are captures of the popover view in a test window with sample transcript text and microphone permission unavailable. The menu bar icon is shown in the brand image above. See [brand assets and capture notes](docs/media/brand/README.md).
 
-In **Settings → General → Recording Indicator Style**, choose the bottom capsule with a caret dot, a dot beside your writing, or a floating window. The dot-only style follows the active caret or pointer while you dictate.
+In **Settings → General → Recording Indicator Style**, choose the bottom capsule with a caret dot, a dot beside your writing, or a floating window. The dot-only style follows the active caret or pointer while you dictate. The capsule and floating window appear on the display containing the focused writing window.
 
 | Bottom capsule | Dot near writing | Floating window |
 |---|---|---|
