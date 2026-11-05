@@ -32,7 +32,7 @@ These are captures of Sotto's SwiftUI views with sample text and audio levels. T
 
 Sotto runs on an Apple silicon Mac with **macOS 14 or later**. To build it, use **macOS 15.6 or later** with Xcode 26, its Metal toolchain, and XcodeGen. The build does not require an Apple Developer account.
 
-Download `Sotto.zip` from [GitHub Releases](https://github.com/divingsbysangam/sotto/releases), unzip it, and move `Sotto.app` to `/Applications`. The published v2.0 download predates the interface and icon updates shown above; build from current source to use them. The self-signed release has not been notarized by Apple. On first launch, Control-click the app and choose **Open**, then confirm **Open**. Later launches work normally. Verify the checksum in the release notes before installing.
+Download the latest `Sotto.zip` from [GitHub Releases](https://github.com/divingsbysangam/sotto/releases), unzip it, and move `Sotto.app` to `/Applications`. Version 2.0.1 includes the interface and icon updates shown above, focused-window display placement, and Whisper-only speech support. The self-signed release has not been notarized by Apple. On first launch, Control-click the app and choose **Open**, then confirm **Open**. Later launches work normally. Verify the checksum in the release notes before installing.
 
 To build from source:
 

@@ -6,6 +6,24 @@
     <description>Most recent updates to Sotto</description>
     <language>en</language>
     <item>
+      <title>Version 2.0.1</title>
+      <description><![CDATA[
+        <h2>Sotto 2.0.1</h2>
+<p>Soft Wave app and menu bar icons, a consistent menu popover, and refined capsule, dot, and floating recording controls.</p>
+<p>The capsule and floating window now use the display containing the focused writing window when Accessibility can identify it.</p>
+<p>Whisper Large v3 Turbo remains the local speech engine. Optional Parakeet, Cohere, and Qwen app support has been removed. Existing downloaded optional model files are not deleted automatically.</p>
+<p>For Apple silicon Macs running macOS 14 or later. This self-signed app is not notarized; Control-click and choose Open on first launch.</p>
+      ]]></description>
+      <pubDate>Thu, 05 Nov 2026 19:13:16 GMT</pubDate>
+      <sparkle:version>14</sparkle:version>
+      <sparkle:shortVersionString>2.0.1</sparkle:shortVersionString>
+      <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+      <enclosure url="https://github.com/divingsbysangam/sotto/releases/download/v2.0.1/Sotto.zip"
+                 sparkle:edSignature="bWw1aPXdUyaDkNh78avjz+VVd0lHFtsG/EjDiEMnriPZ6Wo/bt4rnxbzfYAWFcXiEoZCeVmWdUCj8PU4vg9pAA=="
+                 length="6088480"
+                 type="application/octet-stream"/>
+    </item>
+    <item>
       <title>Version 2.0</title>
       <description><![CDATA[
         <h2>Sotto 2.0</h2>
