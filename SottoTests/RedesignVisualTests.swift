@@ -68,7 +68,8 @@ final class RedesignVisualTests: XCTestCase {
             ("bottom-listener", AnyView(NotchCapsuleView(level: meter, isProcessing: false, modeName: "Default", liveText: "Let’s keep the first version small…").padding(24)), .init(width: 520, height: 220), true),
             ("dot-listener", AnyView(CursorIndicatorView(isProcessing: false).frame(maxWidth: .infinity, maxHeight: .infinity)), .init(width: 180, height: 100), false),
             ("floating-listener", AnyView(FloatingDictationView(model: floating, level: meter, onCancel: {}, onPasteNow: {}).padding(20)), .init(width: 380, height: 340), false),
-            ("menu-bar", AnyView(MenuBarView(appState: state, onOpenSettings: {}, onOpenHistory: {}, onNavigate: { _ in })), .init(width: 340, height: 740), false)
+            ("menu-bar-light", AnyView(MenuBarView(appState: state, onOpenSettings: {}, onOpenHistory: {}, onNavigate: { _ in })), .init(width: 340, height: 650), false),
+            ("menu-bar-dark", AnyView(MenuBarView(appState: state, onOpenSettings: {}, onOpenHistory: {}, onNavigate: { _ in })), .init(width: 340, height: 650), true)
         ]
         for (name, view, size, dark) in cases {
             try await capture(view, named: name, size: size, dark: dark, directory: directory)
@@ -79,7 +80,10 @@ final class RedesignVisualTests: XCTestCase {
     }
 
     @MainActor private func capture(_ view: AnyView, named name: String, size: CGSize, dark: Bool, directory: URL) async throws {
-        let host = NSHostingController(rootView: view.preferredColorScheme(dark ? .dark : .light).tint(SottoDesign.accent).groupBoxStyle(SottoGroupBoxStyle()))
+        let reviewView = name.hasPrefix("menu-bar")
+            ? AnyView(view.background(Color(nsColor: .windowBackgroundColor)).environment(\.sottoAccessibilityPreview, true))
+            : view
+        let host = NSHostingController(rootView: reviewView.preferredColorScheme(dark ? .dark : .light).tint(SottoDesign.accent).groupBoxStyle(SottoGroupBoxStyle()))
         host.sizingOptions = []
         let window = NSWindow(contentRect: .init(origin: .zero, size: size), styleMask: [.titled, .resizable], backing: .buffered, defer: false)
         window.isReleasedWhenClosed = false
