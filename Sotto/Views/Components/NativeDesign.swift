@@ -14,7 +14,10 @@ extension EnvironmentValues {
 
 /// Service-free building blocks shared by the redesign previews and future live adapters.
 enum SottoDesign {
-    static let accent = Color.teal
+    static let charcoal = Color(red: 20.0 / 255, green: 20.0 / 255, blue: 19.0 / 255)
+    static let cream = Color(red: 244.0 / 255, green: 240.0 / 255, blue: 230.0 / 255)
+    static let accent = Color(red: 13.0 / 255, green: 148.0 / 255, blue: 136.0 / 255)
+    static let meterTrack = Color.secondary.opacity(0.3)
     static let spacing: CGFloat = 16
     static let cornerRadius: CGFloat = 12
     static let surfaceBorder = Color.secondary.opacity(0.25)
@@ -102,9 +105,9 @@ struct SottoStatusPresentation {
     var color: Color {
         switch tone {
         case .neutral: return .secondary
-        case .ready: return SottoDesign.accent
+        case .ready: return .secondary
         case .attention: return .orange
-        case .recording: return .red
+        case .recording: return SottoDesign.accent
         }
     }
 }
