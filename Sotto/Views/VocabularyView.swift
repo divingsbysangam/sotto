@@ -14,7 +14,7 @@ struct VocabularyTab: View {
         var description: String {
             switch self {
             case .words:
-                return "Add words and phrases to help the transcription engine spell them correctly. Useful for names, technical terms, and brand names."
+                return "Names, jargon, and product terms Sotto should always spell exactly like this. They’re used as hints for the on-device model."
             case .replacements:
                 return "Always write a spoken word or phrase a set way. Applied to every transcript before AI cleanup."
             case .snippets:
@@ -26,40 +26,26 @@ struct VocabularyTab: View {
     @State private var section: Section = .words
     @State private var customVocabulary: String = ""
     @State private var newWord: String = ""
+    @State private var confirmsClearAll = false
 
     private var vocabularyList: [String] {
         VocabularyInput.additions(from: customVocabulary, existing: [])
     }
 
     var body: some View {
-        VStack(spacing: 0) {
-            // Header
-            VStack(alignment: .leading, spacing: 8) {
-                HStack {
-                    Text("Vocabulary")
-                        .font(.title2)
-                        .fontWeight(.semibold)
-                    Spacer()
-                    VocabularyImportExportMenus()
-                }
-
-                Picker("Vocabulary section", selection: $section) {
-                    ForEach(Section.allCases, id: \.self) { section in
-                        Text(section.rawValue).tag(section)
-                    }
-                }
-                .pickerStyle(.segmented)
-                .labelsHidden()
-                .frame(maxWidth: 360)
-
-                Text(section.description)
-                    .font(.callout)
-                    .foregroundColor(.secondary)
+        VStack(alignment: .leading, spacing: SottoDesign.spacing / 2) {
+            SottoPageHeader(title: "Vocabulary", subtitle: "Teach Sotto the words you use") {
+                VocabularyImportExportMenus()
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding()
 
-            Divider()
+            Picker("Vocabulary section", selection: $section) {
+                ForEach(Section.allCases, id: \.self) { section in
+                    Text(section.rawValue).tag(section)
+                }
+            }
+            .pickerStyle(.segmented)
+            .labelsHidden()
+            .frame(maxWidth: 360)
 
             switch section {
             case .words:
@@ -69,8 +55,18 @@ struct VocabularyTab: View {
             case .snippets:
                 SnippetsEditor(settings: settings)
             }
+            Spacer(minLength: 0)
         }
-        .navigationTitle("Vocabulary")
+        .padding(SottoDesign.spacing)
+        .background(SottoDesign.charcoal)
+        .confirmationDialog("Remove all vocabulary words?", isPresented: $confirmsClearAll) {
+            Button("Remove All Words", role: .destructive) {
+                customVocabulary = ""
+                saveSettings()
+            }
+        } message: {
+            Text("This removes your custom words from this Mac.")
+        }
         .onAppear { loadSettings() }
         // Words can also arrive from Services › Add to Sotto Vocabulary while this is open.
         .onReceive(NotificationCenter.default.publisher(for: UserDefaults.didChangeNotification)) { _ in
@@ -82,75 +78,70 @@ struct VocabularyTab: View {
 
     @ViewBuilder
     private var wordsSection: some View {
-        // Add new word
-        VStack(alignment: .leading, spacing: 8) {
-        HStack {
-            TextField("Add a word or phrase...", text: $newWord)
-                .textFieldStyle(.roundedBorder)
-                .onSubmit {
-                    addWord()
-                }
-
-            Button("Add") {
-                addWord()
+        VStack(alignment: .leading, spacing: SottoDesign.spacing / 2) {
+            Text("Words").font(.subheadline.weight(.semibold))
+            Text(section.description).font(.caption).foregroundStyle(.secondary)
+            HStack(spacing: SottoDesign.spacing / 2) {
+                TextField("Add a word or phrase…", text: $newWord)
+                    .textFieldStyle(.plain)
+                    .padding(.horizontal, SottoDesign.spacing / 2)
+                    .frame(height: 32)
+                    .background(SottoDesign.charcoal, in: RoundedRectangle(cornerRadius: 8))
+                    .onSubmit(addWord)
+                Button("Add", systemImage: "plus", action: addWord)
+                    .sottoPrimaryAction()
+                    .disabled(VocabularyInput.additions(from: newWord, existing: vocabularyList).isEmpty)
             }
-            .sottoPrimaryAction()
-            .disabled(VocabularyInput.additions(from: newWord, existing: vocabularyList).isEmpty)
+            if !newWord.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
+               VocabularyInput.additions(from: newWord, existing: vocabularyList).isEmpty {
+                Text("These words are already in your vocabulary.")
+                    .font(.caption).foregroundStyle(.secondary)
+            }
         }
-        if !newWord.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
-           VocabularyInput.additions(from: newWord, existing: vocabularyList).isEmpty {
-            Text("These words are already in your vocabulary.").font(.caption).foregroundStyle(.secondary)
-        }
-        }
-        .padding()
+        .sottoSurface()
 
-        Divider()
-
-        // Word list
         if vocabularyList.isEmpty {
             SottoEmptyState(symbol: .vocabulary, title: "No custom words yet", detail: "Add names and terms to help Sotto spell them correctly.")
-            .frame(maxHeight: .infinity)
+                .frame(height: 140)
+                .sottoSurface()
         } else {
-            List {
+            FlowLayout(spacing: SottoDesign.spacing / 2) {
                 ForEach(vocabularyList, id: \.self) { word in
-                    HStack {
-                        Text(word)
-                        Spacer()
+                    HStack(spacing: SottoDesign.spacing / 4) {
+                        Text(word).font(.caption)
                         Button {
                             removeWord(word)
                         } label: {
-                            Image(systemName: "xmark.circle.fill")
-                                .foregroundColor(.secondary)
+                            Image(systemName: "xmark")
+                                .font(.caption2)
+                                .foregroundStyle(.secondary)
                         }
                         .buttonStyle(.plain)
                         .help("Remove \(word)")
                         .accessibilityLabel("Remove \(word)")
                     }
+                    .padding(.horizontal, SottoDesign.spacing / 2)
+                    .padding(.vertical, SottoDesign.spacing / 3)
+                    .background(SottoDesign.cream.opacity(0.06), in: RoundedRectangle(cornerRadius: 8))
                 }
             }
-            .listStyle(.inset)
+            .sottoSurface()
         }
 
-        Divider()
-
-        // Footer
         HStack {
             Text("\(vocabularyList.count) word\(vocabularyList.count == 1 ? "" : "s")")
-                .font(.caption)
-                .foregroundColor(.secondary)
+                .foregroundStyle(.secondary)
 
             Spacer()
 
             if !vocabularyList.isEmpty {
-                Button("Clear All") {
-                    customVocabulary = ""
-                    saveSettings()
-                }
-                .font(.caption)
-                .foregroundColor(.red)
+                Button("Clear All") { confirmsClearAll = true }
+                    .buttonStyle(.plain)
+                    .foregroundStyle(.secondary)
             }
+            Text("Stored locally").foregroundStyle(.secondary)
         }
-        .padding()
+        .font(.caption)
     }
 
     private func loadSettings() {
