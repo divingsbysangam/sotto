@@ -1,5 +1,5 @@
+import AppKit
 import SwiftUI
-import Sparkle
 
 struct MenuBarView: View {
     @Bindable var appState: AppState
@@ -8,226 +8,151 @@ struct MenuBarView: View {
     var onNavigate: (SottoRoute) -> Void
 
     var body: some View {
-        ViewThatFits(in: .vertical) {
-            contents.fixedSize(horizontal: false, vertical: true)
-            ScrollView { contents }.frame(height: maximumHeight)
-        }
-        .frame(width: 320)
-        .frame(maxHeight: maximumHeight)
-        .tint(SottoDesign.accent)
+        contents
     }
 
-    private var maximumHeight: CGFloat { min(760, (NSScreen.main?.visibleFrame.height ?? 840) - 80) }
-
     private var contents: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            // Status indicator
+        VStack(alignment: .leading, spacing: SottoDesign.spacing) {
             LiveDictationStatusView(appState: appState, onNavigate: { route in
                 NSApp.keyWindow?.close()
                 onNavigate(route)
-            })
-            .padding(.horizontal, 12)
-            .padding(.top, 8)
+            }, compact: true)
 
             Divider()
 
-            // Recording button
-            Button(action: { appState.toggleRecording() }) {
-                HStack {
-                    Image(systemName: appState.isRecording ? "stop.circle.fill" : "mic.circle.fill")
-                        .foregroundColor(appState.isRecording ? .red : .primary)
-                    Text(appState.isRecording ? "Stop Recording" : "Start Recording")
-                    Spacer()
-                    Text(AppSettings.shared.hotkeyDisplayName)
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                }
-            }
-            .buttonStyle(.borderless)
-            .disabled(appState.isProcessing)
-            .padding(.horizontal, 12)
-            .padding(.vertical, 4)
+            VStack(alignment: .leading, spacing: SottoDesign.spacing / 2) {
+                recordingControl
 
-            // Audio level indicator (when recording)
-            if appState.isRecording {
-                MenuAudioMeter(appState: appState).padding(.horizontal, 12)
+                if appState.isRecording {
+                    MenuAudioMeter(appState: appState)
+                }
+
+                if let entry = appState.lastSavedTranscriptEntry {
+                    transcriptPreview(entry)
+                }
+
+                menuAction("Paste Last Transcript", symbol: .paste,
+                           shortcut: AppSettings.shared.pasteLastDisplayName,
+                           enabled: appState.lastSavedTranscriptEntry != nil) {
+                    NSApp.keyWindow?.close()
+                    appState.pasteLastTranscript(fromMenu: true)
+                }
+                menuAction("Copy Last Transcript", symbol: .copy,
+                           shortcut: AppSettings.shared.copyLastDisplayName,
+                           enabled: appState.lastSavedTranscriptEntry != nil) {
+                    appState.copyLastTranscript()
+                }
+                menuAction("Scratchpad", symbol: .scratchpad,
+                           shortcut: AppSettings.shared.scratchpadDisplayName) {
+                    NSApp.keyWindow?.close()
+                    appState.openScratchpad()
+                }
+                let isSpeaking = SpeechService.shared.isSpeaking
+                menuAction(isSpeaking ? "Stop Reading" : "Read Last Transcript Aloud",
+                           symbol: isSpeaking ? .stop : .read,
+                           shortcut: AppSettings.shared.readLastDisplayName,
+                           enabled: isSpeaking || appState.lastReadableTranscript != nil) {
+                    appState.readLastTranscript()
+                }
             }
 
             Divider()
 
-            // Last transcription preview
-            if let lastText = appState.lastTranscription {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("Last transcript:")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                    Text(lastText.prefix(100) + (lastText.count > 100 ? "..." : ""))
-                        .font(.caption)
-                        .lineLimit(3)
+            VStack(alignment: .leading, spacing: SottoDesign.spacing / 2) {
+                menuAction("Transcripts", symbol: .transcripts) {
+                    NSApp.keyWindow?.close()
+                    onOpenHistory()
                 }
-                .padding(.horizontal, 12)
-                .padding(.vertical, 4)
-
-                Divider()
-            }
-
-            // Recover a missed or wrong-app paste without retyping (greyed out until there's history)
-            let hasTranscript = appState.lastSavedTranscript != nil
-
-            Button(action: {
-                // Close this menu first so the paste lands in the app the user was in.
-                NSApp.keyWindow?.close()
-                appState.pasteLastTranscript(fromMenu: true)
-            }) {
-                HStack {
-                    Image(systemName: "doc.on.clipboard")
-                    Text("Paste Last Transcript")
-                    Spacer()
-                    Text(AppSettings.shared.pasteLastDisplayName)
-                        .font(.caption)
-                        .foregroundColor(.secondary)
+                menuAction("Open Sotto", symbol: .openApp, shortcut: "⌘,") {
+                    onOpenSettings()
+                }
+                menuAction("Check for Updates…", symbol: .updates) {
+                    WindowManager.shared.updaterController.checkForUpdates(nil)
+                }
+                menuAction("Quit", symbol: .quit, shortcut: "⌘Q") {
+                    NSApplication.shared.terminate(nil)
                 }
             }
-            .buttonStyle(.borderless)
-            .disabled(!hasTranscript)
-            .opacity(hasTranscript ? 1 : 0.4)
-            .padding(.horizontal, 12)
-            .padding(.vertical, 4)
-
-            Button(action: { appState.copyLastTranscript() }) {
-                HStack {
-                    Image(systemName: "doc.on.doc")
-                    Text("Copy Last Transcript")
-                    Spacer()
-                    Text(AppSettings.shared.copyLastDisplayName)
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                }
-            }
-            .buttonStyle(.borderless)
-            .disabled(!hasTranscript)
-            .opacity(hasTranscript ? 1 : 0.4)
-            .padding(.horizontal, 12)
-            .padding(.vertical, 4)
-
-            // L7: dictate into a local note instead of an app.
-            Button(action: {
-                NSApp.keyWindow?.close()
-                appState.openScratchpad()
-            }) {
-                HStack {
-                    Image(systemName: "note.text")
-                    Text("Scratchpad")
-                    Spacer()
-                    Text(AppSettings.shared.scratchpadDisplayName)
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                }
-            }
-            .buttonStyle(.borderless)
-            .padding(.horizontal, 12)
-            .padding(.vertical, 4)
-
-            // L13: listen back to proofread by ear; the same item stops reading.
-            let isSpeaking = SpeechService.shared.isSpeaking
-            let canRead = isSpeaking || appState.lastReadableTranscript != nil
-            Button(action: { appState.readLastTranscript() }) {
-                HStack {
-                    Image(systemName: isSpeaking ? "stop.circle" : "speaker.wave.2")
-                    Text(isSpeaking ? "Stop Reading" : "Read Last Transcript Aloud")
-                    Spacer()
-                    Text(AppSettings.shared.readLastDisplayName)
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                }
-            }
-            .buttonStyle(.borderless)
-            .disabled(!canRead)
-            .opacity(canRead ? 1 : 0.4)
-            .padding(.horizontal, 12)
-            .padding(.vertical, 4)
-
-            Divider()
-
-            // Open Sotto (main window)
-            Button(action: {
-                NSApp.keyWindow?.close()
-                onOpenHistory()
-            }) {
-                Label("Transcripts", systemImage: SottoSymbol.transcripts.rawValue)
-            }
-            .buttonStyle(.borderless)
-            .padding(.horizontal, 12)
-            .padding(.vertical, 4)
-
-            Button(action: { onOpenSettings() }) {
-                HStack {
-                    Image(systemName: "macwindow")
-                    Text("Open Sotto")
-                    Spacer()
-                    Text("⌘,")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                }
-            }
-            .buttonStyle(.borderless)
-            .padding(.horizontal, 12)
-            .padding(.vertical, 4)
-
-            Divider()
-
-            // Check for Updates
-            Button(action: {
-                WindowManager.shared.updaterController.checkForUpdates(nil)
-            }) {
-                HStack {
-                    Image(systemName: "arrow.triangle.2.circlepath")
-                    Text("Check for Updates...")
-                    Spacer()
-                }
-            }
-            .buttonStyle(.borderless)
-            .padding(.horizontal, 12)
-            .padding(.vertical, 4)
-
-            Divider()
-
-            // Quit
-            Button(action: { NSApplication.shared.terminate(nil) }) {
-                HStack {
-                    Image(systemName: "power")
-                    Text("Quit")
-                    Spacer()
-                    Text("⌘Q")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                }
-            }
-            .buttonStyle(.borderless)
-            .padding(.horizontal, 12)
-            .padding(.vertical, 4)
-            .padding(.bottom, 8)
         }
+        .padding(SottoDesign.spacing)
         .frame(width: 320)
-        .tint(SottoDesign.accent)
     }
 
+    @ViewBuilder private var recordingControl: some View {
+        if appState.isRecording {
+            menuAction("Stop Recording", symbol: .stop,
+                       shortcut: AppSettings.shared.hotkeyDisplayName) {
+                appState.toggleRecording()
+            }
+        } else {
+            Button(action: { appState.toggleRecording() }) {
+                actionLabel("Start Recording", symbol: .record,
+                            shortcut: AppSettings.shared.hotkeyDisplayName)
+            }
+            .sottoPrimaryAction()
+            .tint(SottoDesign.accent)
+            .disabled(appState.isProcessing)
+        }
+    }
+
+    private func transcriptPreview(_ entry: TranscriptionEntry) -> some View {
+        VStack(alignment: .leading, spacing: SottoDesign.spacing / 2) {
+            Text("Last transcript")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+            Text(entry.text)
+                .lineLimit(3)
+                .frame(maxWidth: .infinity, alignment: .leading)
+            Text("\(entry.sourceApp ?? "Sotto") · \(entry.timestamp.formatted(date: .abbreviated, time: .shortened))")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .lineLimit(1)
+        }
+        .sottoSurface()
+    }
+
+    private func menuAction(_ title: String, symbol: SottoSymbol, shortcut: String? = nil,
+                            enabled: Bool = true, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            actionLabel(title, symbol: symbol, shortcut: shortcut)
+        }
+        .buttonStyle(.plain)
+        .disabled(!enabled)
+    }
+
+    private func actionLabel(_ title: String, symbol: SottoSymbol, shortcut: String?) -> some View {
+        HStack(spacing: SottoDesign.spacing / 2) {
+            Image(systemName: symbol.rawValue)
+                .font(.system(size: 14, weight: .regular))
+                .foregroundStyle(.secondary)
+                .frame(width: SottoDesign.spacing)
+                .accessibilityHidden(true)
+            Text(title)
+            Spacer(minLength: 0)
+            if let shortcut {
+                Text(shortcut)
+                    .font(.system(.caption, design: .monospaced))
+                    .foregroundStyle(.secondary)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.vertical, SottoDesign.spacing / 4)
+        .contentShape(Rectangle())
+    }
 }
 
 /// Audio updates stay local and never trigger readiness announcements.
 private struct MenuAudioMeter: View {
     let appState: AppState
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
-        HStack(spacing: 2) {
+        HStack(spacing: SottoDesign.spacing / 8) {
             ForEach(0..<20, id: \.self) { index in
-                RoundedRectangle(cornerRadius: 2)
+                RoundedRectangle(cornerRadius: SottoDesign.spacing / 8)
                     .fill(index < Int(appState.audioLevel * 20) ? SottoDesign.accent : Color.secondary.opacity(0.3))
-                    .frame(width: 8, height: 12)
+                    .frame(width: SottoDesign.spacing / 2, height: SottoDesign.spacing * 0.75)
             }
         }
-        .animation(reduceMotion ? nil : .easeOut(duration: SottoDesign.feedbackDuration), value: appState.audioLevel)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel("Microphone level")
     }

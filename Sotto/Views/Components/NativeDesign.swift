@@ -54,6 +54,13 @@ enum SottoSymbol: String {
     case retry = "arrow.clockwise"
     case close = "xmark"
     case scratchpad = "note.text"
+    case record = "mic.circle.fill"
+    case stop = "stop.circle"
+    case paste = "doc.on.clipboard"
+    case read = "speaker.wave.2"
+    case openApp = "macwindow"
+    case updates = "arrow.triangle.2.circlepath"
+    case quit = "power"
 
     var label: String {
         switch self {
@@ -69,6 +76,13 @@ enum SottoSymbol: String {
         case .retry: return "Retry"
         case .close: return "Dismiss"
         case .scratchpad: return "Scratchpad"
+        case .record: return "Start Recording"
+        case .stop: return "Stop"
+        case .paste: return "Paste"
+        case .read: return "Read aloud"
+        case .openApp: return "Open Sotto"
+        case .updates: return "Check for Updates"
+        case .quit: return "Quit"
         }
     }
 }

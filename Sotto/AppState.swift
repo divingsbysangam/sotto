@@ -249,8 +249,12 @@ final class AppState {
     // MARK: - Last Transcript Actions
 
     /// The newest saved transcript. Read from history so it survives relaunches.
+    var lastSavedTranscriptEntry: TranscriptionEntry? {
+        historyManager.entries.first { !$0.isFailed && !$0.text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
+    }
+
     var lastSavedTranscript: String? {
-        historyManager.entries.first { !$0.isFailed && !$0.text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }?.text
+        lastSavedTranscriptEntry?.text
     }
 
     /// Pastes the latest transcript and restores the clipboard afterwards. From the menu, it

@@ -7,6 +7,7 @@ struct LiveDictationStatusView: View {
     let appState: AppState
     let onNavigate: (SottoRoute) -> Void
     var announcesChanges = false
+    var compact = false
     private let manager = TranscriptionEngineManager.shared
     @State private var microphoneAllowed = AVCaptureDevice.authorizationStatus(for: .audio) == .authorized
     @State private var accessibilityAllowed = AXIsProcessTrusted()
@@ -31,7 +32,8 @@ struct LiveDictationStatusView: View {
             SottoStatusView(status: state.primary.status, onAction: state.primary.route.map { route in
                 { onNavigate(route) }
             })
-            if let readiness = state.readiness {
+            if let readiness = state.readiness,
+               !compact || readiness.status.actionTitle != nil {
                 Divider()
                 SottoStatusView(status: readiness.status, onAction: readiness.route.map { route in
                     { onNavigate(route) }
