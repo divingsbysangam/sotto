@@ -12,105 +12,57 @@ struct ModesTab: View {
     @State private var isEditingDefaults: Bool = false
 
     var body: some View {
-        VStack(spacing: 0) {
-            // Default Instructions Section
-            VStack(alignment: .leading, spacing: 12) {
-                HStack {
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text("Default Instructions")
-                            .font(.title2)
-                            .fontWeight(.semibold)
-                        Text("Applied to all transcripts. A matching app mode adds its instructions after these, or replaces them if it overrides defaults.")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                    }
-                    Spacer()
-                    Button(isEditingDefaults ? "Done" : "Edit") {
-                        isEditingDefaults.toggle()
-                    }
+        ScrollView {
+            VStack(alignment: .leading, spacing: SottoDesign.spacing) {
+                SottoPageHeader(title: "App Modes", subtitle: "Tune how Sotto writes in each app") {
+                    ModeImportExportButtons(settings: settings) { loadModes() }
+                    Button("Add Mode", systemImage: "plus") { showingAddMode = true }
+                        .sottoPrimaryAction()
                 }
 
-                if isEditingDefaults {
-                    TextEditor(text: $defaultInstructions)
-                        .font(.system(.body, design: .monospaced))
-                        .frame(minHeight: 100, maxHeight: 150)
-                        .scrollContentBackground(.hidden)
-                        .padding(8)
-                        .background(Color(nsColor: .textBackgroundColor))
-                        .cornerRadius(8)
-                        .onChange(of: defaultInstructions) {
-                            settings.defaultInstructions = defaultInstructions
+                defaultInstructionsSection
+
+                VStack(alignment: .leading, spacing: SottoDesign.spacing / 4) {
+                    Text("App Modes").font(.subheadline.weight(.semibold))
+                    Text("When the frontmost app matches a mode, Sotto uses that mode’s instructions.")
+                        .font(.caption).foregroundStyle(.secondary)
+                }
+
+                if appModes.isEmpty {
+                    SottoEmptyState(symbol: .appModes, title: "No app modes yet", detail: "Add a mode to customize dictation for an app or website.")
+                        .sottoSurface()
+                } else {
+                    VStack(spacing: 0) {
+                        ForEach(appModes) { mode in
+                            ModeRowView(mode: mode, onToggle: { toggleMode(mode) }, onEdit: { editingMode = mode })
+                                .contextMenu {
+                                    Button("Edit…") { editingMode = mode }
+                                    Button("Export…") { ModeExport.run([mode]) { _ in NSSound.beep() } }
+                                    if !mode.isBuiltIn {
+                                        Button("Delete", role: .destructive) { deleteMode(mode) }
+                                    }
+                                }
+                            if mode.id != appModes.last?.id { Divider() }
                         }
-
-                    Button("Reset to Default") {
-                        defaultInstructions = """
-                        Clean up the dictated text:
-                        - Fix grammar and punctuation
-                        - Remove filler words (um, uh, like, you know, basically, so, well, etc.)
-                        - Remove false starts and repeated words
-                        - Keep the original meaning and tone
-                        """
-                        settings.defaultInstructions = defaultInstructions
                     }
-                    .font(.caption)
+                    .sottoSurface()
                 }
-            }
-            .sottoSurface()
-            .padding(16)
 
-            Divider()
-
-            // App Modes Header
-            VStack(alignment: .leading, spacing: 8) {
-                Text("App Modes")
-                    .font(.headline)
-
-                Text("Modes identify which app you're in and add their instructions after the defaults. Enable 'Override Default Instructions' on a mode to use only its instructions for that app.")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding()
-
-            Divider()
-
-            // Mode list
-            if appModes.isEmpty {
-                SottoEmptyState(symbol: .appModes, title: "No app modes yet", detail: "Add a mode to customize dictation for an app or website.")
-                .frame(maxHeight: .infinity)
-            } else {
-                List {
-                    ForEach(appModes) { mode in
-                        ModeRowView(mode: mode, onToggle: { toggleMode(mode) }, onEdit: { editingMode = mode })
-                            .contextMenu {
-                                Button("Edit…") { editingMode = mode }
-                                Button("Export…") { ModeExport.run([mode]) { _ in NSSound.beep() } }
-                            }
+                HStack {
+                    Text("\(appModes.filter { $0.isEnabled }.count) of \(appModes.count) modes enabled")
+                        .foregroundStyle(.secondary)
+                    Spacer()
+                    Button("Reset to Defaults") {
+                        settings.resetModesToDefaults()
+                        loadModes()
                     }
-                    .onDelete(perform: deleteModes)
+                    .buttonStyle(.plain)
                 }
-                .listStyle(.inset)
+                .font(.caption)
             }
-
-            Divider()
-
-            HStack {
-                Text("\(appModes.filter { $0.isEnabled }.count) of \(appModes.count) modes enabled")
-                    .font(.caption).foregroundStyle(.secondary)
-                Spacer()
-                Button("Reset to Defaults") {
-                    settings.resetModesToDefaults()
-                    loadModes()
-                }.font(.caption)
-            }.padding(12)
+            .padding(SottoDesign.spacing)
         }
-        .navigationTitle("App Modes")
-        .toolbar {
-            ToolbarItemGroup {
-                ModeImportExportButtons(settings: settings) { loadModes() }
-                Button("Add Mode", systemImage: "plus") { showingAddMode = true }.sottoPrimaryAction()
-            }
-        }
+        .background(SottoDesign.charcoal)
         .onAppear {
             loadModes()
             defaultInstructions = settings.defaultInstructions
@@ -154,25 +106,67 @@ struct ModesTab: View {
         saveModes()
     }
 
-    private func deleteModes(at offsets: IndexSet) {
-        // Don't allow deleting built-in modes
-        let indicesToDelete = offsets.filter { !appModes[$0].isBuiltIn }
-        appModes.remove(atOffsets: IndexSet(indicesToDelete))
+    private func deleteMode(_ mode: AppMode) {
+        guard !mode.isBuiltIn else { return }
+        appModes.removeAll { $0.id == mode.id }
         saveModes()
+    }
+
+    private var defaultInstructionsSection: some View {
+        VStack(alignment: .leading, spacing: SottoDesign.spacing / 2) {
+            HStack {
+                VStack(alignment: .leading, spacing: SottoDesign.spacing / 4) {
+                    Text("Default Instructions").font(.subheadline.weight(.semibold))
+                    Text("Applied everywhere unless an app mode matches the frontmost app.")
+                        .font(.caption).foregroundStyle(.secondary)
+                }
+                Spacer()
+                Button(isEditingDefaults ? "Done" : "Edit") { isEditingDefaults.toggle() }
+                    .buttonStyle(.bordered)
+                    .tint(SottoDesign.cream.opacity(0.7))
+            }
+
+            if isEditingDefaults {
+                TextEditor(text: $defaultInstructions)
+                    .font(.system(.body, design: .monospaced))
+                    .frame(minHeight: 100, maxHeight: 150)
+                    .sottoEditor()
+                    .onChange(of: defaultInstructions) { settings.defaultInstructions = defaultInstructions }
+                Button("Reset to Default") {
+                    defaultInstructions = """
+                    Clean up the dictated text:
+                    - Fix grammar and punctuation
+                    - Remove filler words (um, uh, like, you know, basically, so, well, etc.)
+                    - Remove false starts and repeated words
+                    - Keep the original meaning and tone
+                    """
+                    settings.defaultInstructions = defaultInstructions
+                }
+                .font(.caption)
+            } else {
+                Text(defaultInstructions)
+                    .font(.caption)
+                    .foregroundStyle(SottoDesign.cream.opacity(0.8))
+                    .lineLimit(2)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(SottoDesign.spacing / 2)
+                    .background(SottoDesign.charcoal, in: RoundedRectangle(cornerRadius: 8))
+            }
+        }
+        .sottoSurface()
     }
 }
 
 private struct ModeBadge: View {
     let text: String
-    let color: Color
 
     var body: some View {
         Text(text)
             .font(.caption2)
-            .foregroundColor(color)
+            .foregroundStyle(SottoDesign.cream.opacity(0.6))
             .padding(.horizontal, 6)
             .padding(.vertical, 2)
-            .background(color.opacity(0.2))
+            .background(SottoDesign.cream.opacity(0.08))
             .cornerRadius(4)
     }
 }
@@ -211,52 +205,40 @@ struct ModeRowView: View {
             VStack(alignment: .leading, spacing: 4) {
                 HStack {
                     Text(mode.displayName)
-                        .font(.headline)
+                        .font(.subheadline.weight(.semibold))
                     if mode.isBuiltIn {
                         Text("Built-in")
                             .font(.caption2)
-                            .foregroundColor(.secondary)
+                            .foregroundStyle(SottoDesign.accent)
                             .padding(.horizontal, 6)
                             .padding(.vertical, 2)
-                            .background(Color.secondary.opacity(0.2))
+                            .background(SottoDesign.accent.opacity(0.15))
                             .cornerRadius(4)
+                    } else {
+                        ModeBadge(text: "Custom")
                     }
                     if mode.overrideDefaults {
-                        Text("Overrides")
-                            .font(.caption2)
-                            .foregroundColor(.orange)
-                            .padding(.horizontal, 6)
-                            .padding(.vertical, 2)
-                            .background(Color.orange.opacity(0.2))
-                            .cornerRadius(4)
+                        ModeBadge(text: "Overrides")
                     }
                     if mode.skipsCleanup {
-                        ModeBadge(text: "Raw", color: .blue)
+                        ModeBadge(text: "Raw")
                     }
                     if mode.translateToEnglish {
-                        ModeBadge(text: "→ English", color: .teal)
+                        ModeBadge(text: "→ English")
                     }
                     if mode.sendAfterPaste {
-                        ModeBadge(text: "Sends \(mode.sendKey == .commandReturn ? "⌘⏎" : "⏎")", color: .purple)
+                        ModeBadge(text: "Sends \(mode.sendKey == .commandReturn ? "⌘⏎" : "⏎")")
                     }
                     if mode.requiresAppleIntelligence && !LLMService.foundationModelsAvailable {
-                        ModeBadge(text: "Needs Apple Intelligence", color: .secondary)
+                        ModeBadge(text: "Needs Apple Intelligence")
                             .help("This mode is skipped until Apple Intelligence is available on this Mac.")
                     }
                 }
 
-                Text(matchSummary)
+                Text(matchSummary == "No matches configured" ? matchSummary : "Matches \(matchSummary)")
                     .font(.caption)
                     .foregroundColor(.secondary)
                     .lineLimit(1)
-
-                if !mode.prompt.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                    Text(mode.prompt)
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                        .lineLimit(1)
-                        .italic()
-                }
             }
 
             Spacer()
@@ -265,9 +247,10 @@ struct ModeRowView: View {
             Button("Edit") {
                 onEdit()
             }
-            .buttonStyle(.bordered)
+            .buttonStyle(.plain)
+            .foregroundStyle(SottoDesign.cream)
         }
-        .padding(.vertical, 4)
+        .padding(.vertical, SottoDesign.spacing / 2)
     }
 }
 

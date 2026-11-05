@@ -13,12 +13,15 @@ struct ModeImportExportButtons: View {
     @State private var errorMessage: String?
 
     var body: some View {
-        HStack {
-            Button("Import…") { importModes() }
-                .font(.caption)
-            Button("Export All…") { ModeExport.run(settings.appModes) { errorMessage = $0 } }
-                .font(.caption)
+        HStack(spacing: SottoDesign.spacing / 2) {
+            Button("Import", systemImage: "arrow.down.to.line") { importModes() }
+            Button("Export", systemImage: "arrow.up.to.line") {
+                ModeExport.run(settings.appModes) { errorMessage = $0 }
+            }
         }
+        .font(.caption)
+        .buttonStyle(.plain)
+        .foregroundStyle(SottoDesign.cream)
         .sheet(isPresented: Binding(get: { preview != nil }, set: { if !$0 { preview = nil } })) {
             if let preview {
                 ModeImportSheet(source: previewSource, items: preview) { chosen in
