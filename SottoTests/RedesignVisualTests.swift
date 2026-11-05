@@ -48,6 +48,7 @@ final class RedesignVisualTests: XCTestCase {
         }
         let meter = CapsuleLevel(value: 0.65)
         let floating = FloatingDictationModel()
+        let floatingReady = FloatingDictationModel(state: .readyToPaste(text: "Please send the revised outline after lunch."))
         let cases: [(String, AnyView, CGSize, Bool)] = [
             ("dashboard-500-light", main(.destination(.dashboard)), .init(width: 500, height: 400), false),
             ("dashboard-700-light", main(.destination(.dashboard)), .init(width: 700, height: 500), false),
@@ -66,8 +67,12 @@ final class RedesignVisualTests: XCTestCase {
             ("onboarding-microphone", AnyView(OnboardingView(appState: state, onFinish: {})), .init(width: 520, height: 500), false),
             ("onboarding-screen-context", AnyView(OnboardingView(appState: state, initialStep: 4, onFinish: {})), .init(width: 520, height: 500), true),
             ("bottom-listener", AnyView(NotchCapsuleView(level: meter, isProcessing: false, modeName: "Default", liveText: "Let’s keep the first version small…").padding(24)), .init(width: 520, height: 220), true),
+            ("bottom-listener-light", AnyView(NotchCapsuleView(level: meter, isProcessing: false, modeName: "Default", liveText: "Let’s keep the first version small…").padding(24)), .init(width: 520, height: 220), false),
+            ("bottom-processing-dark", AnyView(NotchCapsuleView(level: meter, isProcessing: true, statusText: "Transcribing on this Mac").padding(24)), .init(width: 520, height: 160), true),
             ("dot-listener", AnyView(CursorIndicatorView(isProcessing: false).frame(maxWidth: .infinity, maxHeight: .infinity)), .init(width: 180, height: 100), false),
             ("floating-listener", AnyView(FloatingDictationView(model: floating, level: meter, onCancel: {}, onPasteNow: {}).padding(20)), .init(width: 380, height: 340), false),
+            ("floating-listener-dark", AnyView(FloatingDictationView(model: floating, level: meter, onCancel: {}, onPasteNow: {}).padding(20)), .init(width: 380, height: 340), true),
+            ("floating-ready-dark", AnyView(FloatingDictationView(model: floatingReady, level: meter, onCancel: {}, onPasteNow: {}).padding(20)), .init(width: 380, height: 340), true),
             ("menu-bar-light", AnyView(MenuBarView(appState: state, onOpenSettings: {}, onOpenHistory: {}, onNavigate: { _ in })), .init(width: 340, height: 650), false),
             ("menu-bar-dark", AnyView(MenuBarView(appState: state, onOpenSettings: {}, onOpenHistory: {}, onNavigate: { _ in })), .init(width: 340, height: 650), true)
         ]
@@ -80,7 +85,8 @@ final class RedesignVisualTests: XCTestCase {
     }
 
     @MainActor private func capture(_ view: AnyView, named name: String, size: CGSize, dark: Bool, directory: URL) async throws {
-        let reviewView = name.hasPrefix("menu-bar")
+        let usesOpaqueFallback = name.hasPrefix("bottom-") || name.hasPrefix("floating-") || name.hasPrefix("dot-") || name.hasPrefix("menu-bar")
+        let reviewView = usesOpaqueFallback
             ? AnyView(view.background(Color(nsColor: .windowBackgroundColor)).environment(\.sottoAccessibilityPreview, true))
             : view
         let host = NSHostingController(rootView: reviewView.preferredColorScheme(dark ? .dark : .light).tint(SottoDesign.accent).groupBoxStyle(SottoGroupBoxStyle()))

@@ -57,8 +57,12 @@ final class FloatingDictationWindow: NSPanel {
 
     func updateState(_ state: DictationState) {
         guard model.state != state else { return }
+        let previousKey = model.countdownKey
         model.state = state
-        model.generation = presentation.renew()
+        let generation = presentation.renew()
+        if model.countdownKey.isReadyToPaste != previousKey.isReadyToPaste {
+            model.generation = generation
+        }
         scheduleLayout(for: presentation.generation)
     }
 

@@ -17,6 +17,8 @@ enum SottoDesign {
     static let accent = Color.teal
     static let spacing: CGFloat = 16
     static let cornerRadius: CGFloat = 12
+    static let surfaceBorder = Color.secondary.opacity(0.25)
+    static let floatingShadow = Color.black.opacity(0.15)
     static let feedbackDuration = 0.15
     static let contentDuration = 0.2
 }
@@ -189,6 +191,7 @@ struct SottoIconButton: View {
                 .frame(minWidth: 24, minHeight: 24)
         }
         .buttonStyle(.borderless)
+        .tint(Color.secondary)
         .accessibilityLabel(label ?? symbol.label)
         .help(label ?? symbol.label)
     }

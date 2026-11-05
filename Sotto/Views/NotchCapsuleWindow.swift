@@ -37,6 +37,7 @@ struct NotchCapsuleView: View {
     var contextCaptured = false
     var modeName: String? = nil
     var liveText: String? = nil
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     private var status: SottoStatusPresentation {
         RecordingOverlayStatus.make(isProcessing: isProcessing, message: statusText)
@@ -44,9 +45,9 @@ struct NotchCapsuleView: View {
 
     var body: some View {
         SottoGlassControlGroup {
-            VStack(spacing: 8) {
+            VStack(spacing: SottoDesign.spacing / 2) {
                 if let prompt {
-                    HStack(spacing: 12) {
+                    HStack(spacing: SottoDesign.spacing) {
                         Image(systemName: prompt.icon).foregroundStyle(prompt.iconColor).accessibilityHidden(true)
                         Text(prompt.text).font(.callout).lineLimit(2).frame(maxWidth: 360, alignment: .leading)
                             .fixedSize(horizontal: false, vertical: true)
@@ -58,13 +59,15 @@ struct NotchCapsuleView: View {
                             SottoIconButton(symbol: .close, action: dismiss)
                         }
                     }
-                    .padding(.horizontal, 16).padding(.vertical, 12)
+                    .padding(.horizontal, SottoDesign.spacing).padding(.vertical, SottoDesign.spacing * 0.75)
                     .sottoFloatingControls()
                 } else {
-                    HStack(spacing: 12) {
+                    HStack(spacing: SottoDesign.spacing) {
                         Label(status.title, systemImage: status.symbol)
                             .font(.callout.weight(.medium)).foregroundStyle(status.color).lineLimit(2)
                             .fixedSize(horizontal: false, vertical: true)
+                            .id(status.title)
+                            .transition(.opacity)
                         if !isProcessing { CapsuleAudioMeter(level: level) }
                         if let modeName, !isProcessing {
                             Text(modeName).font(.caption).foregroundStyle(.secondary).lineLimit(1)
@@ -74,7 +77,7 @@ struct NotchCapsuleView: View {
                                 .accessibilityLabel("Using selected or copied text as context")
                         }
                     }
-                    .padding(.horizontal, 16).padding(.vertical, 12)
+                    .padding(.horizontal, SottoDesign.spacing).padding(.vertical, SottoDesign.spacing * 0.75)
                     .sottoFloatingControls()
                     if let liveText, !liveText.isEmpty, !isProcessing {
                         Text(liveText).font(.callout).lineLimit(2).truncationMode(.head)
@@ -83,8 +86,8 @@ struct NotchCapsuleView: View {
                 }
             }
         }
-        .tint(SottoDesign.accent)
-        .shadow(color: .black.opacity(0.15), radius: 8, y: 4)
+        .animation(reduceMotion ? nil : .easeInOut(duration: SottoDesign.contentDuration), value: isProcessing)
+        .shadow(color: SottoDesign.floatingShadow, radius: SottoDesign.spacing / 2, y: SottoDesign.spacing / 4)
         .fixedSize()
     }
 }

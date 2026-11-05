@@ -116,8 +116,10 @@ final class RedesignLifecycleTests: XCTestCase {
             window.updateAudioLevel(Float(index) / 12)
             try await Task.sleep(nanoseconds: 40_000_000)
         }
+        window.updateState(.readyToPaste(text: "Synthetic countdown with updated preview"))
         XCTAssertTrue(originalContent === window.contentView)
-        try await Task.sleep(nanoseconds: 3_200_000_000)
+        // Editing the preview must not restart the three-second paste countdown.
+        try await Task.sleep(nanoseconds: 2_750_000_000)
         XCTAssertEqual(pasted, 1)
         XCTAssertFalse(window.isVisible)
         XCTAssertFalse(window.canBecomeKey)
