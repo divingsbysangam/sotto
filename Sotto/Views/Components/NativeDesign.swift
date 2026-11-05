@@ -15,7 +15,7 @@ extension EnvironmentValues {
 /// Service-free building blocks shared by the redesign previews and future live adapters.
 enum SottoDesign {
     static let charcoal = Color(red: 20.0 / 255, green: 20.0 / 255, blue: 19.0 / 255)
-    static let cream = Color(red: 244.0 / 255, green: 240.0 / 255, blue: 230.0 / 255)
+    static let cream = Color(red: 244.0 / 255, green: 243.0 / 255, blue: 240.0 / 255)
     static let accent = Color(red: 13.0 / 255, green: 148.0 / 255, blue: 136.0 / 255)
     static let meterTrack = Color.secondary.opacity(0.3)
     static let spacing: CGFloat = 16
@@ -106,7 +106,7 @@ struct SottoStatusPresentation {
         switch tone {
         case .neutral: return .secondary
         case .ready: return .secondary
-        case .attention: return .orange
+        case .attention: return SottoDesign.accent
         case .recording: return SottoDesign.accent
         }
     }
@@ -215,8 +215,8 @@ struct SottoStatusView: View {
                     .frame(width: 28)
                     .accessibilityHidden(true)
                 VStack(alignment: .leading, spacing: 4) {
-                    Text(status.title).font(.headline)
-                    Text(status.detail).font(.callout).foregroundStyle(.secondary)
+                    Text(status.title).font(.headline).foregroundStyle(SottoDesign.cream)
+                    Text(status.detail).font(.callout).foregroundStyle(SottoDesign.cream.opacity(0.7))
                         .fixedSize(horizontal: false, vertical: true)
                 }
                 Spacer(minLength: 0)

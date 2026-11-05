@@ -51,6 +51,8 @@ class SottoAppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func applicationDidFinishLaunching(_ notification: Notification) {
+        // Soft Wave uses one dark app appearance across SwiftUI and AppKit windows.
+        NSApp.appearance = NSAppearance(named: .darkAqua)
         if ProcessInfo.processInfo.environment["SOTTO_TESTING"] == "1" { return }
         // Services menu: "Add to Sotto Vocabulary" (NSServices in project.yml).
         NSApp.servicesProvider = VocabularyServiceProvider.shared
@@ -104,6 +106,7 @@ struct SottoApp: App {
                 },
                 navigation: WindowManager.shared.navigation
             )
+            .preferredColorScheme(.dark)
             .task {
                 // Store window action for AppDelegate / menu bar to use
                 WindowManager.shared.openMainWindow = { [openWindow] in
@@ -145,6 +148,7 @@ struct SottoApp: App {
                     WindowManager.shared.openAppropriateWindow(route: route)
                 }
             )
+            .preferredColorScheme(.dark)
             .task {
                 // Store window action from menu bar context
                 WindowManager.shared.openMainWindow = { [openWindow] in
