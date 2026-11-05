@@ -1,3 +1,5 @@
+import AppKit
+import AVFoundation
 import SwiftUI
 
 struct MainWindowView: View {
@@ -5,48 +7,62 @@ struct MainWindowView: View {
     var settings: AppSettings
     var onSave: (() -> Void)?
     @Bindable var navigation: SottoNavigation
+    @State private var microphoneAllowed = AVCaptureDevice.authorizationStatus(for: .audio) == .authorized
+    @State private var accessibilityAllowed = AXIsProcessTrusted()
+    @State private var enginePhase = TranscriptionEngineManager.shared.engine.phase
+
+    private var dictationStatus: SottoStatusPresentation {
+        let manager = TranscriptionEngineManager.shared
+        return DictationPresentation.make(recording: appState.recordingState,
+                                         processingStatus: appState.processingStatus,
+                                         microphoneAllowed: microphoneAllowed,
+                                         accessibilityAllowed: accessibilityAllowed,
+                                         engineName: manager.effectiveID.displayName,
+                                         enginePhase: enginePhase,
+                                         progress: manager.engine.progress,
+                                         fallbackNotice: manager.fallbackNotice,
+                                         error: appState.lastError,
+                                         output: appState.dictationFeedback.result).primary.status
+    }
 
     var body: some View {
-        NavigationSplitView {
-            List(SottoDestination.allCases, id: \.self, selection: $navigation.destination) { tab in
-                Label(tab.rawValue, systemImage: tab.symbol.rawValue)
-                    .tag(tab)
+        VStack(spacing: 0) {
+            SottoTopNavigation(navigation: navigation, status: dictationStatus)
+                .padding(.horizontal, SottoDesign.spacing)
+                .padding(.vertical, SottoDesign.spacing / 2)
+
+            if let fileImport = appState.fileImport {
+                importBanner(fileImport)
+                    .padding(.horizontal, SottoDesign.spacing)
             }
-            .listStyle(.sidebar)
-            .navigationSplitViewColumnWidth(min: 150, ideal: 180, max: 220)
-        } detail: {
-            VStack(spacing: 0) {
-                if let fileImport = appState.fileImport {
-                    importBanner(fileImport)
-                    Divider()
-                }
-                switch navigation.destination {
-                case .dashboard:
-                    DashboardView(appState: appState, onNavigate: navigation.open)
-                case .transcripts:
-                    HistoryTab(appState: appState)
-                case .appModes:
-                    ModesTab(settings: settings)
-                case .vocabulary:
-                    VocabularyTab(settings: settings, onSave: onSave)
-                case .settings:
-                    SettingsTab(settings: settings, onSave: onSave, selectedSection: $navigation.settingsSection)
-                case .help:
-                    HelpTab(appState: appState)
-                }
-            }
+
+            destinationView
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+
+            SottoWindowFooter(modelLoaded: enginePhase == .ready)
+                .padding(.horizontal, SottoDesign.spacing * 1.5)
+                .padding(.vertical, SottoDesign.spacing / 2)
         }
-        .frame(minWidth: 500, minHeight: 400)
+        .frame(minWidth: 700, minHeight: 500)
+        .background(SottoDesign.charcoal)
         .tint(SottoDesign.accent)
         .groupBoxStyle(SottoGroupBoxStyle())
-        // N6: first-run setup (and "Run Setup Again" from Help).
+        .task {
+            // Permissions and the speech engine do not all publish observable changes.
+            while !Task.isCancelled {
+                microphoneAllowed = AVCaptureDevice.authorizationStatus(for: .audio) == .authorized
+                accessibilityAllowed = AXIsProcessTrusted()
+                enginePhase = TranscriptionEngineManager.shared.engine.phase
+                do { try await Task.sleep(nanoseconds: 2_000_000_000) }
+                catch { return }
+            }
+        }
         .sheet(isPresented: $appState.showOnboarding) {
             OnboardingView(appState: appState) {
                 appState.showOnboarding = false
             }
             .interactiveDismissDisabled()
         }
-        // N13: drop audio/video files anywhere in the window to transcribe them into Transcripts.
         .onDrop(of: [.fileURL], isTargeted: nil) { providers in
             for provider in providers {
                 _ = provider.loadObject(ofClass: URL.self) { url, _ in
@@ -58,11 +74,28 @@ struct MainWindowView: View {
         }
     }
 
+    @ViewBuilder private var destinationView: some View {
+        switch navigation.destination {
+        case .dashboard:
+            DashboardView(appState: appState, onNavigate: navigation.open)
+        case .transcripts:
+            HistoryTab(appState: appState)
+        case .appModes:
+            ModesTab(settings: settings)
+        case .vocabulary:
+            VocabularyTab(settings: settings, onSave: onSave)
+        case .settings:
+            SettingsTab(settings: settings, onSave: onSave, selectedSection: $navigation.settingsSection)
+        case .help:
+            HelpTab(appState: appState)
+        }
+    }
+
     private func importBanner(_ fileImport: AppState.FileImport) -> some View {
-        HStack(spacing: 12) {
+        HStack(spacing: SottoDesign.spacing / 2) {
             Image(systemName: "waveform")
-                .foregroundColor(.accentColor)
-            VStack(alignment: .leading, spacing: 4) {
+                .foregroundStyle(SottoDesign.accent)
+            VStack(alignment: .leading, spacing: SottoDesign.spacing / 4) {
                 Text("Transcribing “\(fileImport.fileName)”" + (fileImport.queued > 0 ? " (+\(fileImport.queued) more)" : ""))
                     .font(.callout)
                     .lineLimit(1)
@@ -70,7 +103,6 @@ struct MainWindowView: View {
             }
             Button("Cancel") { appState.cancelImport() }
         }
-        .padding(10)
-        .background(.bar)
+        .sottoSurface()
     }
 }
