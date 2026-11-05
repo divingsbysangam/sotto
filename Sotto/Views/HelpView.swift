@@ -1,45 +1,88 @@
+import AppKit
 import SwiftUI
 
 // MARK: - Help Tab
 
 struct HelpTab: View {
     var appState: AppState
-    @Environment(\.openWindow) private var openWindow
 
     var body: some View {
         NavigationStack {
-        List {
-            Section {
-                HelpItemRow(
-                    icon: "play.circle",
-                    title: "Getting Started",
-                    subtitle: "Learn the basics of Sotto"
-                ) {
-                    GettingStartedView(onRunSetup: { appState.showOnboarding = true })
-                }
+            ScrollView {
+                VStack(alignment: .leading, spacing: SottoDesign.spacing / 2) {
+                    SottoPageHeader(title: "Help", subtitle: "Guides and info") {}
 
-                HelpItemRow(
-                    icon: "command",
-                    title: "Keyboard Shortcuts",
-                    subtitle: "Quick reference for all shortcuts"
-                ) {
-                    KeyboardShortcutsHelpView()
-                }
-            }
+                    VStack(spacing: 0) {
+                        HelpItemRow(
+                            icon: "play.circle",
+                            title: "Getting Started",
+                            subtitle: "Set up permissions, pick a microphone, and make your first dictation"
+                        ) {
+                            GettingStartedView(onRunSetup: { appState.showOnboarding = true })
+                        }
 
-            Section {
-                HelpItemRow(
-                    icon: "info.circle",
-                    title: "About Sotto",
-                    subtitle: "Version and credits"
-                ) {
-                    AboutView()
+                        Divider()
+
+                        HelpItemRow(
+                            icon: "keyboard",
+                            title: "Keyboard Shortcuts",
+                            subtitle: "Dictate, use hands-free mode, and control your last transcript"
+                        ) {
+                            KeyboardShortcutsHelpView()
+                        }
+
+                        Divider()
+
+                        HelpItemRow(
+                            icon: "info.circle",
+                            title: "About Sotto",
+                            subtitle: "Version, privacy, and acknowledgements"
+                        ) {
+                            AboutView()
+                        }
+                    }
+                    .sottoSurface()
+
+                    HStack(spacing: SottoDesign.spacing) {
+                        Image(nsImage: NSApp.applicationIconImage)
+                            .resizable()
+                            .frame(width: 56, height: 56)
+                            .accessibilityHidden(true)
+                        VStack(alignment: .leading, spacing: SottoDesign.spacing / 4) {
+                            Text("Sotto")
+                                .font(.headline)
+                                .foregroundStyle(SottoDesign.cream)
+                            Text("Version \(Self.version) · Private, on-device dictation")
+                                .font(.caption)
+                                .foregroundStyle(SottoDesign.cream.opacity(0.6))
+                        }
+                        Spacer(minLength: 0)
+                    }
+                    .sottoSurface()
                 }
+                .frame(maxWidth: 1100)
+                .frame(maxWidth: .infinity)
+                .padding(SottoDesign.spacing)
             }
+            .background(SottoDesign.charcoal)
         }
-        .listStyle(.inset)
-        .navigationTitle("Help")
-        }
+    }
+
+    private static var version: String {
+        Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "?"
+    }
+}
+
+private struct HelpIcon: View {
+    let symbol: String
+
+    var body: some View {
+        Image(systemName: symbol)
+            .font(.system(size: 16, weight: .medium))
+            .foregroundStyle(SottoDesign.accent)
+            .frame(width: 36, height: 36)
+            .background(SottoDesign.accent.opacity(0.14), in: RoundedRectangle(cornerRadius: 9))
+            .accessibilityHidden(true)
     }
 }
 
@@ -53,22 +96,26 @@ struct HelpItemRow<Destination: View>: View {
         NavigationLink {
             destination()
         } label: {
-            HStack(spacing: 12) {
-                Image(systemName: icon)
-                    .font(.title2)
-                    .foregroundColor(.accentColor)
-                    .frame(width: 32)
+            HStack(spacing: SottoDesign.spacing / 2) {
+                HelpIcon(symbol: icon)
 
-                VStack(alignment: .leading, spacing: 2) {
+                VStack(alignment: .leading, spacing: SottoDesign.spacing / 4) {
                     Text(title)
-                        .font(.body)
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(SottoDesign.cream)
                     Text(subtitle)
                         .font(.caption)
-                        .foregroundColor(.secondary)
+                        .foregroundStyle(SottoDesign.cream.opacity(0.6))
                 }
+                Spacer(minLength: 0)
+                Image(systemName: "chevron.right")
+                    .font(.caption.weight(.medium))
+                    .foregroundStyle(SottoDesign.cream.opacity(0.5))
             }
-            .padding(.vertical, 4)
+            .frame(minHeight: 54)
+            .contentShape(Rectangle())
         }
+        .buttonStyle(.plain)
     }
 }
 
@@ -273,49 +320,49 @@ struct ShortcutRow: View {
 
 struct AboutView: View {
     var body: some View {
-        VStack(spacing: 24) {
-            Spacer()
+        ScrollView {
+            VStack(alignment: .leading, spacing: SottoDesign.spacing) {
+                HStack(spacing: SottoDesign.spacing) {
+                    Image(nsImage: NSApp.applicationIconImage)
+                        .resizable()
+                        .frame(width: 88, height: 88)
+                        .accessibilityHidden(true)
+                    VStack(alignment: .leading, spacing: SottoDesign.spacing / 4) {
+                        Text("Sotto")
+                            .font(.largeTitle.weight(.semibold))
+                            .foregroundStyle(SottoDesign.cream)
+                        Text("Voice to Text, Simplified")
+                            .font(.title3)
+                            .foregroundStyle(SottoDesign.cream.opacity(0.7))
+                        Text("Version \(Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "?") (\(Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? "?"))")
+                            .font(.caption)
+                            .foregroundStyle(SottoDesign.cream.opacity(0.6))
+                    }
+                }
+                .sottoSurface()
 
-            Image(systemName: "waveform.circle.fill")
-                .font(.system(size: 80))
-                .foregroundStyle(SottoDesign.accent)
-
-            VStack(spacing: 8) {
-                Text("Sotto")
-                    .font(.largeTitle)
-                    .fontWeight(.bold)
-
-                Text("Voice to Text, Simplified")
-                    .font(.title3)
-                    .foregroundColor(.secondary)
-
-                Text("Version \(Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "?") (\(Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? "?"))")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
+                VStack(alignment: .leading, spacing: SottoDesign.spacing) {
+                    Text("Private by design")
+                        .font(.headline)
+                        .foregroundStyle(SottoDesign.cream)
+                    Text("Sotto transcribes and cleans up speech on this Mac with Whisper Turbo. Send your words to the clipboard, the active app, or Scratchpad. No account or cloud inference is required.")
+                        .foregroundStyle(SottoDesign.cream.opacity(0.7))
+                    Divider()
+                    Link(destination: URL(string: "https://github.com/argmaxinc/WhisperKit")!) {
+                        Label("WhisperKit on GitHub", systemImage: "cpu")
+                    }
+                    Link("Third-party notices", destination: URL(string: "https://github.com/divingsbysangam/sotto/blob/main/THIRD_PARTY_NOTICES.md")!)
+                    Text("Made with SwiftUI")
+                        .font(.caption)
+                        .foregroundStyle(SottoDesign.cream.opacity(0.6))
+                }
+                .sottoSurface()
             }
-
-            VStack(spacing: 12) {
-                Text("Sotto transcribes and cleans up speech on this Mac with Whisper Turbo. Send your words to the clipboard, the active app, or Scratchpad. No account or cloud inference is required.")
-                    .multilineTextAlignment(.center)
-                    .foregroundColor(.secondary)
-                    .frame(maxWidth: 400)
-            }
-
-            Link(destination: URL(string: "https://github.com/argmaxinc/WhisperKit")!) {
-                Label("WhisperKit on GitHub", systemImage: "cpu")
-            }
-            .font(.callout)
-
-            Link("Third-party notices", destination: URL(string: "https://github.com/divingsbysangam/sotto/blob/main/THIRD_PARTY_NOTICES.md")!)
-                .font(.callout)
-
-            Spacer()
-
-            Text("Made with SwiftUI")
-                .font(.caption)
-                .foregroundColor(.secondary)
+            .frame(maxWidth: 900)
+            .frame(maxWidth: .infinity)
+            .padding(SottoDesign.spacing)
         }
-        .padding()
+        .background(SottoDesign.charcoal)
         .navigationTitle("About")
     }
 }
