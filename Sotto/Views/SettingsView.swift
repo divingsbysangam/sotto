@@ -21,6 +21,7 @@ struct SettingsTab: View {
                 }
             }
             .pickerStyle(.segmented)
+            .labelsHidden()
             .padding()
 
             Divider()
