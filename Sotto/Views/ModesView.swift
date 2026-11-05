@@ -449,6 +449,42 @@ private struct ResizableModeTextEditor: View {
     }
 }
 
+private struct ModeExampleEditor: View {
+    @Binding var example: AppMode.PromptExample
+    let number: Int
+    let onRemove: () -> Void
+    @State private var spokenHeight: CGFloat = 100
+    @State private var writtenHeight: CGFloat = 140
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: SottoDesign.spacing / 2) {
+            HStack {
+                Text("Example \(number)").font(.subheadline.weight(.semibold))
+                Spacer()
+                Button("Remove example", systemImage: "trash", action: onRemove)
+                    .labelStyle(.iconOnly)
+                    .buttonStyle(.borderless)
+                    .foregroundStyle(.secondary)
+            }
+
+            Text("What you might say")
+                .font(.caption.weight(.medium))
+                .foregroundStyle(.secondary)
+            ResizableModeTextEditor(text: $example.input, height: $spokenHeight,
+                                    minimumHeight: 80, maximumHeight: 240)
+
+            Text("What Sotto should write")
+                .font(.caption.weight(.medium))
+                .foregroundStyle(.secondary)
+            ResizableModeTextEditor(text: $example.output, height: $writtenHeight,
+                                    minimumHeight: 100, maximumHeight: 320)
+        }
+        .padding(SottoDesign.spacing / 2)
+        .background(Color(nsColor: .controlBackgroundColor), in: RoundedRectangle(cornerRadius: SottoDesign.cornerRadius))
+        .overlay(RoundedRectangle(cornerRadius: SottoDesign.cornerRadius).strokeBorder(Color.primary.opacity(0.1)))
+    }
+}
+
 struct ModeEditorSheet: View {
     @Environment(\.dismiss) private var dismiss
 
@@ -679,24 +715,11 @@ struct ModeEditorSheet: View {
                         }
 
                         ForEach($promptExamples) { $example in
-                            HStack(alignment: .top) {
-                                VStack(alignment: .leading, spacing: 4) {
-                                    TextField("What you might say…", text: $example.input, axis: .vertical)
-                                        .textFieldStyle(.roundedBorder)
-                                        .lineLimit(1...4)
-                                    TextField("…and what it should become", text: $example.output, axis: .vertical)
-                                        .textFieldStyle(.roundedBorder)
-                                        .lineLimit(1...6)
-                                }
-                                Button {
-                                    promptExamples.removeAll { $0.id == example.id }
-                                } label: {
-                                    Image(systemName: "xmark.circle.fill")
-                                        .foregroundColor(.secondary)
-                                }
-                                .buttonStyle(.plain)
-                                .help("Remove example")
-                            }
+                            ModeExampleEditor(
+                                example: $example,
+                                number: (promptExamples.firstIndex { $0.id == example.id } ?? 0) + 1,
+                                onRemove: { promptExamples.removeAll { $0.id == example.id } }
+                            )
                         }
 
                         Text("Up to \(AppMode.maxPromptExamples) short before → after pairs. Apple Intelligence follows examples better than instructions; they only set the style and are never copied.")
