@@ -10,11 +10,12 @@ struct HistoryTab: View {
 
     private var filteredEntries: [TranscriptionEntry] { historyManager.search(searchText) }
     private var selectedEntry: TranscriptionEntry? { historyManager.entries.first { $0.id == selectedID } }
-    private var visibleWordCount: Int {
-        filteredEntries.reduce(0) { $0 + historyManager.wordCount(for: $1.text) }
+    private func visibleWordCount(in entries: [TranscriptionEntry]) -> Int {
+        entries.reduce(0) { $0 + historyManager.wordCount(for: $1.text) }
     }
 
     var body: some View {
+        let entries = filteredEntries
         VStack(alignment: .leading, spacing: SottoDesign.spacing / 2) {
             SottoPageHeader(title: "Transcripts",
                             subtitle: "\(historyManager.entries.count) transcripts · stored on this Mac") {
@@ -37,10 +38,10 @@ struct HistoryTab: View {
                 selectionActions
             }
 
-            transcriptList
+            transcriptList(entries)
 
             HStack {
-                Text("\(filteredEntries.count) transcript\(filteredEntries.count == 1 ? "" : "s") · \(visibleWordCount) words")
+                Text("\(entries.count) transcript\(entries.count == 1 ? "" : "s") · \(visibleWordCount(in: entries)) words")
                     .foregroundStyle(.secondary)
                 Spacer()
                 if !historyManager.entries.isEmpty {
@@ -67,8 +68,8 @@ struct HistoryTab: View {
         .onChange(of: searchText) { selectedID = nil }
     }
 
-    @ViewBuilder private var transcriptList: some View {
-        if filteredEntries.isEmpty {
+    @ViewBuilder private func transcriptList(_ entries: [TranscriptionEntry]) -> some View {
+        if entries.isEmpty {
             SottoEmptyState(symbol: .transcripts,
                             title: searchText.isEmpty ? "No transcripts yet" : "No matching transcripts",
                             detail: searchText.isEmpty ? "Use your shortcut, or drop an audio or video recording here." : "Try another word or clear your search.")
@@ -84,9 +85,9 @@ struct HistoryTab: View {
                     .padding(.top, SottoDesign.spacing / 2)
                 ScrollView {
                     LazyVStack(spacing: 0) {
-                        ForEach(filteredEntries) { entry in
+                        ForEach(entries) { entry in
                             transcriptRow(entry)
-                            if entry.id != filteredEntries.last?.id {
+                            if entry.id != entries.last?.id {
                                 Divider().padding(.horizontal, SottoDesign.spacing)
                             }
                         }
@@ -108,7 +109,7 @@ struct HistoryTab: View {
                     .frame(width: 24, height: 24)
                     .overlay(Text(String((entry.sourceApp ?? "S").prefix(1))).font(.caption2.weight(.semibold)))
                     .accessibilityHidden(true)
-                Text(entry.isFailed ? "Dictation needs attention" : entry.text.isEmpty ? "No transcript text" : entry.text)
+                Text(entry.isFailed ? "Dictation failed: \(entry.failureReason ?? "Unknown error")" : entry.text.isEmpty ? "No transcript text" : entry.text)
                     .font(.caption)
                     .foregroundStyle(entry.isFailed ? SottoDesign.accent : SottoDesign.cream)
                     .lineLimit(2)
