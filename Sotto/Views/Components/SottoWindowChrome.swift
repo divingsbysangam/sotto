@@ -8,39 +8,39 @@ struct SottoTopNavigation: View {
     @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
 
     var body: some View {
-        HStack(spacing: SottoDesign.spacing) {
-            HStack(spacing: SottoDesign.spacing / 2) {
-                Image(nsImage: NSApp.applicationIconImage)
-                    .resizable()
-                    .frame(width: 22, height: 22)
-                    .accessibilityHidden(true)
-                Text("Sotto")
-                    .font(.headline)
-                    .foregroundStyle(SottoDesign.cream)
-            }
-            .accessibilityElement(children: .combine)
-
-            ScrollView(.horizontal) {
-                HStack(spacing: SottoDesign.spacing / 4) {
-                    ForEach(SottoDestination.allCases) { destination in
-                        tab(destination)
-                    }
+        ZStack {
+            HStack {
+                HStack(spacing: SottoDesign.spacing / 2) {
+                    Image(nsImage: NSApp.applicationIconImage)
+                        .resizable()
+                        .frame(width: 22, height: 22)
+                        .accessibilityHidden(true)
+                    Text("Sotto")
+                        .font(.headline)
+                        .foregroundStyle(SottoDesign.cream)
                 }
+                .accessibilityElement(children: .combine)
+
+                Spacer(minLength: 0)
+
+                HStack(spacing: SottoDesign.spacing / 4) {
+                    Circle()
+                        .fill(status.tone == .ready || status.tone == .recording
+                              ? SottoDesign.accent : SottoDesign.cream.opacity(0.5))
+                        .frame(width: 6, height: 6)
+                    Text(status.title == "Ready to dictate" ? "Ready" : status.title)
+                        .lineLimit(1)
+                }
+                .font(.caption)
+                .foregroundStyle(SottoDesign.cream)
+                .accessibilityLabel(status.title)
             }
-            .scrollIndicators(.hidden)
-            .frame(maxWidth: .infinity)
 
             HStack(spacing: SottoDesign.spacing / 4) {
-                Circle()
-                    .fill(status.tone == .ready || status.tone == .recording
-                          ? SottoDesign.accent : SottoDesign.cream.opacity(0.5))
-                    .frame(width: 6, height: 6)
-                Text(status.title == "Ready to dictate" ? "Ready" : status.title)
-                    .lineLimit(1)
+                ForEach(SottoDestination.allCases) { destination in
+                    tab(destination)
+                }
             }
-            .font(.caption)
-            .foregroundStyle(SottoDesign.cream)
-            .accessibilityLabel(status.title)
         }
         .padding(.horizontal, SottoDesign.spacing / 2)
         .frame(height: 40)
