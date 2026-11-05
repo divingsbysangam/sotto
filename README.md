@@ -22,7 +22,7 @@ These are captures of the popover view in a test window with sample transcript t
 
 ![Sotto's recording indicator choices in Settings: Bottom capsule + dot, Dot near writing, and Floating window](docs/media/recording-indicator-options.jpg)
 
-In **Settings → General → Recording Indicator Style**, choose the bottom capsule with a caret dot, a dot beside your writing, or a floating window. The dot-only style follows the active caret or pointer while you dictate. The capsule and floating window appear on the display containing the focused writing window.
+In **Settings → General → Recording Indicator Style**, choose the bottom capsule with a caret dot, a dot beside your writing, or a floating window. The dot-only style follows the active caret or pointer while you dictate.
 
 ![The bottom capsule animating between listening and processing states](docs/media/capsule-demo.gif)
 
@@ -30,7 +30,7 @@ The capsule demo renders Sotto's SwiftUI view with synthetic audio levels. It co
 
 ## Get started
 
-Sotto runs on an Apple silicon Mac with **macOS 14 or later**. To build it, use **macOS 15.6 or later** with Xcode 26 or later and XcodeGen. The build does not require an Apple Developer account.
+Sotto runs on an Apple silicon Mac with **macOS 14 or later**. To build it, use **macOS 15.6 or later** with Xcode 26, its Metal toolchain, and XcodeGen. The build does not require an Apple Developer account.
 
 Download `Sotto.zip` from [GitHub Releases](https://github.com/divingsbysangam/sotto/releases), unzip it, and move `Sotto.app` to `/Applications`. The published v2.0 download predates the interface and icon updates shown above; build from current source to use them. The self-signed release has not been notarized by Apple. On first launch, Control-click the app and choose **Open**, then confirm **Open**. Later launches work normally. Verify the checksum in the release notes before installing.
 
@@ -40,6 +40,7 @@ To build from source:
 git clone https://github.com/divingsbysangam/sotto.git
 cd sotto
 brew install xcodegen
+xcodebuild -downloadComponent MetalToolchain
 ./scripts/build.sh
 ./scripts/build.sh test
 ```
@@ -48,13 +49,16 @@ The build-only script generates the Xcode project, then builds without signing o
 
 ## Dictation and local models
 
-Whisper Large v3 Turbo is Sotto's speech engine. It supports language detection, non-English speech, translation fallback, and live preview. Text cleanup uses Apple Foundation Models on supported Macs or built-in rules.
+Whisper Large v3 Turbo is the default speech engine. It supports language detection, non-English speech, translation fallback, and live preview. Parakeet TDT v3 and Cohere Transcribe q4 are optional engines for English dictation and file imports. You choose when to download and load them. Text cleanup uses Apple Foundation Models on supported Macs, an optional local Qwen model, or built-in rules.
 
 | Model | Download | Use |
 |---|---:|---|
-| Whisper Large v3 Turbo | About 1.6 GB | Dictation and imports |
+| Whisper Large v3 Turbo | About 1.6 GB | Default speech engine |
+| Parakeet TDT v3 | About 0.5 GB | Optional English dictation and imports |
+| Cohere Transcribe q4 | About 1.5 GB | Optional English dictation and imports |
+| Qwen2.5 1.5B Instruct, 4-bit | About 0.9 GB | Optional text cleanup |
 
-The model download is pinned by revision and SHA-256. After installation, dictation works offline. See [third-party notices](THIRD_PARTY_NOTICES.md) for model sources and licenses.
+Model downloads are pinned by revision and SHA-256. After installation, dictation works offline. See [local speech engines](docs/local-speech-engines.md) and [third-party notices](THIRD_PARTY_NOTICES.md) for model sources and licenses.
 
 ## Permissions
 
@@ -74,16 +78,16 @@ You can review or revoke these in **System Settings → Privacy & Security**. Pe
 
 **Does Sotto send recordings to a server?** No. Recognition and cleanup run on your Mac. Model downloads and update checks are the only network uses.
 
-**Why is the first download large?** Whisper is a local model, so Sotto downloads its files once instead of sending speech to a hosted service.
+**Why is the first download large?** Whisper is a local model, so Sotto downloads its files once instead of sending speech to a hosted service. Optional models download only when you request them.
 
 **Why does macOS ask for permissions again after a rebuild?** macOS associates grants with the app's signature and bundle ID. Use the stable self-signed identity and install script in [SETUP.md](SETUP.md). The first public build uses a new bundle ID, so existing private builds need fresh grants once.
 
 **Can I build without installing?** Yes. `./scripts/build.sh` builds without signing or touching `/Applications`.
 
-**Does Sotto work on Intel Macs?** Sotto is built and tested for Apple silicon Macs.
+**Does Sotto work on Intel Macs?** No. The local MLX dependencies require Apple silicon.
 
 ## Project and credits
 
-Sotto is built with SwiftUI, WhisperKit, Sparkle, and HotKey. The model authors and converters are credited in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md). See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the code structure, [CONTRIBUTING.md](CONTRIBUTING.md) to help, and [SECURITY.md](SECURITY.md) to report a vulnerability privately.
+Sotto is built with SwiftUI, WhisperKit, FluidAudio, MLX, Sparkle, and HotKey. The model authors and converters are credited in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md). See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the code structure, [CONTRIBUTING.md](CONTRIBUTING.md) to help, and [SECURITY.md](SECURITY.md) to report a vulnerability privately.
 
 Sotto's own source is [MIT licensed](LICENSE). Dependencies and downloaded models retain their own licenses.
