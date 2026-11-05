@@ -38,56 +38,84 @@ struct NotchCapsuleView: View {
     var modeName: String? = nil
     var liveText: String? = nil
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
+    @Environment(\.sottoAccessibilityPreview) private var accessibilityPreview
 
     private var status: SottoStatusPresentation {
         RecordingOverlayStatus.make(isProcessing: isProcessing, message: statusText)
     }
 
     var body: some View {
-        SottoGlassControlGroup {
-            VStack(spacing: SottoDesign.spacing / 2) {
-                if let prompt {
-                    HStack(spacing: SottoDesign.spacing) {
-                        Image(systemName: prompt.icon).foregroundStyle(prompt.iconColor).accessibilityHidden(true)
-                        Text(prompt.text).font(.callout).lineLimit(2).frame(maxWidth: 360, alignment: .leading)
-                            .fixedSize(horizontal: false, vertical: true)
-                        ForEach(prompt.actions.indices, id: \.self) { index in
-                            Button(prompt.actions[index].title, action: prompt.actions[index].handler)
-                                .foregroundStyle(prompt.actions[index].isPrimary ? SottoDesign.accent : .primary)
-                        }
-                        if let dismiss = prompt.onDismiss {
-                            SottoIconButton(symbol: .close, action: dismiss)
-                        }
+        VStack(alignment: .leading, spacing: SottoDesign.spacing / 3) {
+            if let prompt {
+                HStack(spacing: SottoDesign.spacing / 2) {
+                    Image(systemName: prompt.icon)
+                        .foregroundStyle(prompt.iconColor)
+                        .accessibilityHidden(true)
+                    Text(prompt.text)
+                        .font(.caption)
+                        .foregroundStyle(SottoDesign.cream)
+                        .lineLimit(2)
+                        .frame(maxWidth: 360, alignment: .leading)
+                        .fixedSize(horizontal: false, vertical: true)
+                    ForEach(prompt.actions.indices, id: \.self) { index in
+                        Button(prompt.actions[index].title, action: prompt.actions[index].handler)
+                            .buttonStyle(.plain)
+                            .font(.caption.weight(.semibold))
+                            .foregroundStyle(prompt.actions[index].isPrimary ? SottoDesign.accent : SottoDesign.cream.opacity(0.65))
                     }
-                    .padding(.horizontal, SottoDesign.spacing).padding(.vertical, SottoDesign.spacing * 0.75)
-                    .sottoFloatingControls()
-                } else {
-                    HStack(spacing: SottoDesign.spacing) {
-                        Label(status.title, systemImage: status.symbol)
-                            .font(.callout.weight(.medium)).foregroundStyle(status.color).lineLimit(2)
-                            .fixedSize(horizontal: false, vertical: true)
-                            .id(status.title)
-                            .transition(.opacity)
-                        if !isProcessing { CapsuleAudioMeter(level: level) }
-                        if let modeName, !isProcessing {
-                            Text(modeName).font(.caption).foregroundStyle(.secondary).lineLimit(1)
-                        }
-                        if contextCaptured, !isProcessing {
-                            Image(systemName: "text.quote").foregroundStyle(SottoDesign.accent)
-                                .accessibilityLabel("Using selected or copied text as context")
-                        }
+                    if let dismiss = prompt.onDismiss {
+                        SottoIconButton(symbol: .close, action: dismiss)
                     }
-                    .padding(.horizontal, SottoDesign.spacing).padding(.vertical, SottoDesign.spacing * 0.75)
-                    .sottoFloatingControls()
-                    if let liveText, !liveText.isEmpty, !isProcessing {
-                        Text(liveText).font(.callout).lineLimit(2).truncationMode(.head)
-                            .frame(width: 340, alignment: .leading).sottoSurface()
+                }
+            } else {
+                HStack(spacing: SottoDesign.spacing / 2) {
+                    Image(systemName: status.symbol)
+                        .foregroundStyle(SottoDesign.accent)
+                        .accessibilityHidden(true)
+                    Text(status.title)
+                        .foregroundStyle(isProcessing ? SottoDesign.cream : SottoDesign.accent)
+                        .lineLimit(2)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .id(status.title)
+                        .transition(.opacity)
+                    if !isProcessing { CapsuleAudioMeter(level: level) }
+                    if let modeName, !isProcessing {
+                        Text(modeName)
+                            .foregroundStyle(SottoDesign.cream.opacity(0.6))
+                            .lineLimit(1)
                     }
+                    if contextCaptured, !isProcessing {
+                        Image(systemName: "text.quote")
+                            .foregroundStyle(SottoDesign.accent)
+                            .accessibilityLabel("Using selected or copied text as context")
+                    }
+                }
+                .font(.caption.weight(.medium))
+
+                if let liveText, !liveText.isEmpty, !isProcessing {
+                    Text(liveText)
+                        .font(.caption)
+                        .foregroundStyle(SottoDesign.cream.opacity(0.8))
+                        .lineLimit(1)
+                        .truncationMode(.head)
+                        .frame(width: 340, alignment: .leading)
+                        .padding(.horizontal, SottoDesign.spacing / 2)
+                        .padding(.vertical, SottoDesign.spacing / 3)
+                        .background(SottoDesign.cream.opacity(0.04), in: RoundedRectangle(cornerRadius: 10))
                 }
             }
         }
+        .padding(.horizontal, SottoDesign.spacing * 0.75)
+        .padding(.vertical, SottoDesign.spacing / 2)
+        .background(SottoDesign.charcoal.opacity(reduceTransparency || accessibilityPreview ? 1 : 0.96),
+                    in: RoundedRectangle(cornerRadius: 20))
+        .overlay {
+            RoundedRectangle(cornerRadius: 20)
+                .strokeBorder(SottoDesign.cream.opacity(0.12))
+        }
         .animation(reduceMotion ? nil : .easeInOut(duration: SottoDesign.contentDuration), value: isProcessing)
-        .shadow(color: SottoDesign.floatingShadow, radius: SottoDesign.spacing / 2, y: SottoDesign.spacing / 4)
+        .shadow(color: .black.opacity(0.22), radius: SottoDesign.spacing / 2, y: SottoDesign.spacing / 4)
         .fixedSize()
     }
 }

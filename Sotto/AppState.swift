@@ -849,7 +849,7 @@ final class AppState {
             : "Replace “\(correction.original)” → “\(correction.corrected)”?"
         showPrompt(CapsulePrompt(
             icon: "text.badge.plus",
-            iconColor: Color(red: 0x4F / 255, green: 0xD1 / 255, blue: 0xC5 / 255),
+            iconColor: SottoDesign.accent,
             text: text,
             actions: [.init(title: "Add") { [weak self] in
                 Task { @MainActor in self?.acceptCorrection(correction) }
@@ -1211,7 +1211,7 @@ final class AppState {
         guard remaining > 1 else { return }
         showPrompt(CapsulePrompt(
             icon: "terminal",
-            iconColor: Color(red: 0x4F / 255, green: 0xD1 / 255, blue: 0xC5 / 255),
+            iconColor: SottoDesign.accent,
             text: "\(request.agent.displayName) finished in \(request.project)",
             actions: [
                 .init(title: "Reply") { [weak self] in Task { @MainActor in self?.replyToAgent() } },
