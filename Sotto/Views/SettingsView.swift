@@ -11,22 +11,25 @@ struct SettingsTab: View {
     @Binding var selectedSection: SettingsSection
 
     var body: some View {
-        VStack(spacing: 0) {
+        VStack(alignment: .leading, spacing: SottoDesign.spacing / 2) {
+            SottoPageHeader(title: "Settings", subtitle: selectedSection.rawValue) {
+                EmptyView()
+            }
+            HStack {
+                Spacer(minLength: 0)
+                Picker("Settings section", selection: $selectedSection) {
+                    ForEach(SettingsSection.allCases, id: \.self) { section in
+                        Text(section.rawValue).tag(section)
+                    }
+                }
+                .pickerStyle(.segmented)
+                .labelsHidden()
+                .frame(width: 360)
+                Spacer(minLength: 0)
+            }
+
             AccessibilityBanner()
 
-            // Section picker
-            Picker("Settings section", selection: $selectedSection) {
-                ForEach(SettingsSection.allCases, id: \.self) { section in
-                    Text(section.rawValue).tag(section)
-                }
-            }
-            .pickerStyle(.segmented)
-            .labelsHidden()
-            .padding()
-
-            Divider()
-
-            // Section content
             ScrollView {
                 switch selectedSection {
                 case .general:
@@ -38,7 +41,8 @@ struct SettingsTab: View {
                 }
             }
         }
-        .navigationTitle("Settings")
+        .padding(SottoDesign.spacing)
+        .background(SottoDesign.charcoal)
     }
 }
 
@@ -82,7 +86,6 @@ struct AccessibilityBanner: View {
                         .strokeBorder(Color.orange.opacity(0.35), lineWidth: 1)
                 )
                 .clipShape(RoundedRectangle(cornerRadius: 12))
-                .padding([.horizontal, .top])
             }
         }
         .task {
@@ -124,6 +127,8 @@ struct GeneralSettingsSection: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
+            HStack(alignment: .top, spacing: SottoDesign.spacing) {
+                VStack(alignment: .leading, spacing: SottoDesign.spacing) {
             GroupBox {
                 VStack(alignment: .leading, spacing: 12) {
                     Text("Output Mode")
@@ -268,28 +273,14 @@ struct GeneralSettingsSection: View {
 
             TypingCounterSettings(settings: settings)
 
+                }
+                .frame(maxWidth: .infinity, alignment: .topLeading)
+
+                VStack(alignment: .leading, spacing: SottoDesign.spacing) {
+
             GroupBox {
                 VStack(alignment: .leading, spacing: 12) {
-                    Toggle("Selected & copied text as context", isOn: $useSelectionAndClipboardContext)
-                    Text("With AI Enhancement on, text you had selected or copied within 3 seconds of dictating helps cleanup spell names and terms. It is never pasted, saved, or read from password fields. The capsule shows a quote icon when it's used.")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-
-                    Divider()
-
-                    Toggle("Screen Context (OCR)", isOn: $enableScreenContext)
-                    Text("Off by default. When on, briefly captures on-screen text to improve cleanup. Leave off unless you need OCR — dictation never touches Screen Recording while this is off.")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-
-                    if enableScreenContext {
-                        Text("Requires a one-time Screen Recording grant: System Settings → Privacy & Security → Screen Recording → enable Sotto.")
-                            .font(.caption)
-                            .foregroundColor(.orange)
-                    }
-
-                    Divider()
-
+                    Text("Feedback").font(.headline)
                     Toggle("Enable Sound Effects", isOn: $soundEffectsEnabled)
 
                     Toggle("Show tips", isOn: $tipsEnabled)
@@ -347,8 +338,29 @@ struct GeneralSettingsSection: View {
                         .foregroundColor(.secondary)
                 }
             }
+
+            GroupBox {
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("Privacy & Context").font(.headline)
+                    Toggle("Selected & copied text as context", isOn: $useSelectionAndClipboardContext)
+                    Text("With AI Enhancement on, recently selected or copied text helps spell names and terms. It is never pasted or saved.")
+                        .font(.caption).foregroundStyle(.secondary)
+
+                    Divider()
+
+                    Toggle("Screen Context (OCR)", isOn: $enableScreenContext)
+                    Text("When on, Sotto briefly captures on-screen text to improve cleanup. Off by default.")
+                        .font(.caption).foregroundStyle(.secondary)
+                    if enableScreenContext {
+                        Text("Requires Screen Recording access in System Settings.")
+                            .font(.caption).foregroundStyle(SottoDesign.accent)
+                    }
+                }
+            }
+                }
+                .frame(maxWidth: .infinity, alignment: .topLeading)
+            }
         }
-        .padding(16)
         .onAppear { loadSettings() }
         .onChange(of: outputMode) { saveSettings() }
         .onChange(of: enableScreenContext) { _, enabled in
@@ -445,6 +457,8 @@ struct TranscriptionSettingsSection: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
+            HStack(alignment: .top, spacing: SottoDesign.spacing) {
+                VStack(alignment: .leading, spacing: SottoDesign.spacing) {
             // Local, on-device transcription only
             GroupBox {
                 VStack(alignment: .leading, spacing: 12) {
@@ -516,6 +530,10 @@ struct TranscriptionSettingsSection: View {
                         .foregroundColor(.secondary)
                 }
             }
+                }
+                .frame(maxWidth: .infinity, alignment: .topLeading)
+
+                VStack(alignment: .leading, spacing: SottoDesign.spacing) {
 
             // On-device text cleanup
             GroupBox {
@@ -544,8 +562,10 @@ struct TranscriptionSettingsSection: View {
             LearnFromCorrectionsSettings(settings: settings)
 
             FileNameSettings(settings: settings)
+                }
+                .frame(maxWidth: .infinity, alignment: .topLeading)
+            }
         }
-        .padding(16)
         .onAppear { loadSettings() }
         .onChange(of: enableLLMProcessing) { saveSettings() }
         .onChange(of: voiceCommandsEnabled) { saveSettings() }
@@ -623,6 +643,8 @@ struct SystemSettingsSection: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
+            HStack(alignment: .top, spacing: SottoDesign.spacing) {
+                VStack(alignment: .leading, spacing: SottoDesign.spacing) {
             GroupBox {
                 VStack(alignment: .leading, spacing: 12) {
                     Toggle("Launch at Login", isOn: $launchAtLogin)
@@ -647,10 +669,6 @@ struct SystemSettingsSection: View {
                 }
             }
 
-            CommandLineToolSettings()
-
-            AgentRelaySettings(settings: settings)
-
             GroupBox {
                 VStack(alignment: .leading, spacing: 12) {
                     Text("Updates")
@@ -661,10 +679,20 @@ struct SystemSettingsSection: View {
                     }) {
                         Label("Check for Updates", systemImage: "arrow.triangle.2.circlepath")
                     }
+                    .tint(SottoDesign.cream.opacity(0.75))
                 }
             }
+                }
+                .frame(maxWidth: .infinity, alignment: .topLeading)
+
+                VStack(alignment: .leading, spacing: SottoDesign.spacing) {
+            CommandLineToolSettings()
+
+            AgentRelaySettings(settings: settings)
+                }
+                .frame(maxWidth: .infinity, alignment: .topLeading)
+            }
         }
-        .padding(16)
         .onAppear { loadSettings() }
         .onChange(of: launchAtLogin) { applyLaunchAtLogin() }
         .onChange(of: showDockIcon) { applyDockIconVisibility() }

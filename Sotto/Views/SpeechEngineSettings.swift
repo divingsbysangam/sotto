@@ -13,7 +13,7 @@ struct SpeechEngineSettings: View {
                 modelStatus(engine)
                 if engine.verified {
                     Label("Verified against pinned checksums", systemImage: "checkmark.seal.fill")
-                        .font(.caption).foregroundStyle(.green)
+                        .font(.caption).foregroundStyle(SottoDesign.accent)
                 }
                 if let error = manager.maintenanceError {
                     Text(error).font(.caption).foregroundStyle(.red)
@@ -25,7 +25,7 @@ struct SpeechEngineSettings: View {
     @ViewBuilder private func modelStatus(_ engine: any TranscriptionEngine) -> some View {
         switch engine.phase {
         case .ready:
-            Label("Model ready", systemImage: "checkmark.circle.fill").foregroundStyle(.green)
+            Label("Model ready", systemImage: "checkmark.circle.fill").foregroundStyle(SottoDesign.accent)
         case .notInstalled:
             Text("Model not downloaded").font(.caption)
         case .downloading:
