@@ -10,6 +10,7 @@ struct ModesTab: View {
     @State private var showingAddMode = false
     @State private var defaultInstructions: String = ""
     @State private var isEditingDefaults: Bool = false
+    @State private var defaultEditorHeight: CGFloat = 160
 
     var body: some View {
         ScrollView {
@@ -127,10 +128,8 @@ struct ModesTab: View {
             }
 
             if isEditingDefaults {
-                TextEditor(text: $defaultInstructions)
-                    .font(.system(.body, design: .monospaced))
-                    .frame(minHeight: 100, maxHeight: 150)
-                    .sottoEditor()
+                ResizableModeTextEditor(text: $defaultInstructions, height: $defaultEditorHeight,
+                                        minimumHeight: 120, maximumHeight: 420)
                     .onChange(of: defaultInstructions) { settings.defaultInstructions = defaultInstructions }
                 Button("Reset to Default") {
                     defaultInstructions = """
@@ -407,6 +406,49 @@ struct ChipView: View {
 
 // MARK: - Mode Editor Sheet
 
+/// A bounded text view gives the editor its own scroll area inside the page or sheet.
+private struct ResizableModeTextEditor: View {
+    @Binding var text: String
+    @Binding var height: CGFloat
+    let minimumHeight: CGFloat
+    let maximumHeight: CGFloat
+    @State private var dragStartHeight: CGFloat?
+
+    var body: some View {
+        TextEditor(text: $text)
+            .font(.system(.body, design: .monospaced))
+            .scrollContentBackground(.hidden)
+            .scrollIndicators(.visible)
+            .padding(8)
+            .frame(height: height)
+            .background(Color(nsColor: .textBackgroundColor), in: RoundedRectangle(cornerRadius: 8))
+            .overlay(RoundedRectangle(cornerRadius: 8).strokeBorder(Color.secondary.opacity(0.25)))
+            .overlay(alignment: .bottomTrailing) {
+                Image(systemName: "arrow.up.left.and.arrow.down.right")
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+                    .padding(7)
+                    .contentShape(Rectangle())
+                    .gesture(DragGesture(minimumDistance: 2)
+                        .onChanged { value in
+                            if dragStartHeight == nil { dragStartHeight = height }
+                            height = min(max((dragStartHeight ?? height) + value.translation.height,
+                                             minimumHeight), maximumHeight)
+                        }
+                        .onEnded { _ in dragStartHeight = nil })
+                    .accessibilityLabel("Resize instructions editor")
+                    .accessibilityAdjustableAction { direction in
+                        switch direction {
+                        case .increment: height = min(height + 40, maximumHeight)
+                        case .decrement: height = max(height - 40, minimumHeight)
+                        @unknown default: break
+                        }
+                    }
+                    .help("Drag to resize the text editor")
+            }
+    }
+}
+
 struct ModeEditorSheet: View {
     @Environment(\.dismiss) private var dismiss
 
@@ -422,6 +464,7 @@ struct ModeEditorSheet: View {
     @State private var translateToEnglish: Bool
     @State private var promptExamples: [AppMode.PromptExample]
     @State private var catalogCategories: [String]
+    @State private var instructionsEditorHeight: CGFloat = 200
 
     @State private var showingAppPicker = false
     @State private var newWebsite = ""
@@ -609,13 +652,8 @@ struct ModeEditorSheet: View {
                         Text("Mode Instructions")
                             .font(.headline)
 
-                        TextEditor(text: $prompt)
-                            .font(.system(.body, design: .monospaced))
-                            .frame(minHeight: 80)
-                            .scrollContentBackground(.hidden)
-                            .padding(8)
-                            .background(Color(nsColor: .textBackgroundColor))
-                            .cornerRadius(8)
+                        ResizableModeTextEditor(text: $prompt, height: $instructionsEditorHeight,
+                                                minimumHeight: 140, maximumHeight: 480)
 
                         Text("Describe the output you want, briefly. Put names and terms in Vocabulary instead.")
                             .font(.caption)
