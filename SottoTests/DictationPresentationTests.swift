@@ -89,22 +89,19 @@ final class DictationPresentationTests: XCTestCase {
         XCTAssertEqual(SottoDestination.allCases.count, 6)
     }
 
-    @MainActor func testEffectiveEngineReadinessUsesFallbackRatherThanSelectedModel() {
+    @MainActor func testWhisperReadinessDrivesPresentation() {
         let (settings, _) = isolatedSettings()
-        settings.speechEngine = .parakeet
         settings.languageMode = .auto
-        let whisper = FakeSpeechEngine(.whisper)
+        let whisper = FakeSpeechEngine()
         whisper.phase = .ready
-        let parakeet = FakeSpeechEngine(.parakeet)
-        parakeet.phase = .notInstalled
-        let manager = TranscriptionEngineManager(settings: settings, engines: [.whisper: whisper, .parakeet: parakeet])
+        let manager = TranscriptionEngineManager(settings: settings, engines: [.whisper: whisper])
         let shown = DictationPresentation.make(recording: .idle, processingStatus: "", microphoneAllowed: true, accessibilityAllowed: true,
                                               engineName: manager.effectiveID.displayName, enginePhase: manager.engine(for: manager.effectiveID).phase,
                                               progress: 0, fallbackNotice: manager.fallbackNotice, error: nil, output: nil)
         XCTAssertEqual(shown.primary.status.title, "Ready to dictate")
         XCTAssertTrue(shown.primary.status.detail.contains("Whisper"))
-        whisper.phase = .failed("Missing fallback")
-        XCTAssertEqual(manager.engine(for: manager.effectiveID).phase, .failed("Missing fallback"))
+        whisper.phase = .failed("Model missing")
+        XCTAssertEqual(manager.engine(for: manager.effectiveID).phase, .failed("Model missing"))
     }
 
     @MainActor func testCopyOutputAndFeedbackUseRealIsolatedPasteboard() async {

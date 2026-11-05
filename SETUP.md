@@ -8,11 +8,10 @@ This page takes a fresh clone to a running app. For how the code is organised, s
 
 | | Requirement |
 |---|---|
-| Mac | Apple silicon. The MLX packages Sotto uses don't support Intel. |
+| Mac | Apple silicon, the platform Sotto builds and tests on. |
 | macOS to **build** | macOS Sequoia 15.6 or later (Xcode 26 won't run on older macOS) |
 | macOS to **run** Sotto | macOS 14 or later |
 | Xcode | Xcode 26 or later, with the command-line tools selected |
-| Metal toolchain | Downloaded separately by Xcode 26 (see below) |
 | XcodeGen | `brew install xcodegen` |
 | Disk space | A few GB for Xcode's package builds, plus 1.6 GB for the Whisper model when you first run the app |
 
@@ -25,13 +24,12 @@ git clone https://github.com/divingsbysangam/sotto.git
 cd sotto
 
 brew install xcodegen
-xcodebuild -downloadComponent MetalToolchain   # once; mlx-swift compiles Metal kernels
 
 ./scripts/build.sh          # generates the project, builds Debug into build/DerivedData
 ./scripts/build.sh test     # builds and runs the unit tests
 ```
 
-The first build downloads the Swift packages and compiles the MLX Metal kernels, so it takes several minutes. Later builds are much faster.
+The first build downloads the Swift packages, so it takes several minutes. Later builds are much faster.
 
 `./scripts/build.sh` needs no signing identity and installs nothing. The result is `build/DerivedData/Build/Products/Debug/Sotto.app`. Set `CONFIGURATION=Release` for a Release build.
 
@@ -41,7 +39,7 @@ The first build downloads the Swift packages and compiles the MLX Metal kernels,
 
 ### Opening it in Xcode
 
-Run `xcodegen generate`, open `Sotto.xcodeproj`, and press ⌘R. On the first build Xcode asks you to trust build plugins and macros from some packages (for example mlx-swift and swift-transformers). Choose **Trust & Enable**. The command-line scripts pass `-skipPackagePluginValidation -skipMacroValidation` for the same reason: `xcodebuild` can't show that prompt.
+Run `xcodegen generate`, open `Sotto.xcodeproj`, and press ⌘R. The command-line scripts pass package validation flags so `xcodebuild` can run without interactive prompts.
 
 ### Swift versions
 
@@ -78,15 +76,13 @@ Grant these when prompted, or later in System Settings → Privacy & Security:
 
 Sotto then downloads the Whisper Large v3 Turbo model (about 1.6 GB, once) into `~/Documents/huggingface/models/argmaxinc/whisperkit-coreml/`. After that, dictation works offline. Settings → Transcription shows progress, "Model ready", or an error with a **Retry** button.
 
-Parakeet TDT v3 (about 0.5 GB) and Cohere Transcribe (about 1.5 GB) are optional English engines. Choose **Download**, then **Load Model**, in Settings → Transcription. Details, pinning and benchmarks are in [docs/local-speech-engines.md](docs/local-speech-engines.md).
-
 ## Tests
 
 ```bash
 ./scripts/build.sh test
 ```
 
-This runs the unit tests in `SottoTests/` unsigned and offline. The speech-engine benchmark is skipped unless you opt in (see [docs/local-speech-engines.md](docs/local-speech-engines.md)). The same command runs in CI on every pull request.
+This runs the unit tests in `SottoTests/` unsigned and offline. The same command runs in CI on every pull request.
 
 Microphone capture, Accessibility paste and screen context need an interactive desktop session with permissions granted, so they aren't covered by the automated tests.
 
@@ -105,9 +101,6 @@ If you use it, turn off "Launch at Login" inside Sotto to avoid starting twice.
 
 ### `xcodegen: command not found`
 Run `brew install xcodegen`.
-
-### The build fails with a Metal error
-The Metal toolchain is missing or outdated. Run `xcodebuild -downloadComponent MetalToolchain`, then build again. Check with `xcrun metal --version`.
 
 ### `xcodebuild` says Xcode isn't selected
 Run `sudo xcode-select -s /Applications/Xcode.app/Contents/Developer`.

@@ -527,7 +527,6 @@ struct TranscriptionSettingsSection: View {
             }
 
             if enableLLMProcessing {
-                LocalLLMSettings(settings: settings)
             }
 
             GroupBox {
@@ -539,7 +538,7 @@ struct TranscriptionSettingsSection: View {
                 }
             }
 
-            LiveTextSettings(settings: settings, languageMode: languageMode)
+            LiveTextSettings(settings: settings)
 
             LearnFromCorrectionsSettings(settings: settings)
 
@@ -558,7 +557,7 @@ struct TranscriptionSettingsSection: View {
     // MARK: - Model
 
     private var modelSettings: some View {
-        SpeechEngineSettings(languageMode: languageMode)
+        SpeechEngineSettings()
     }
 
     // MARK: - Actions

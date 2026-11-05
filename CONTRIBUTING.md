@@ -12,7 +12,7 @@ For anything larger than a small fix, please open an issue first and describe th
 
 ## Set up
 
-Follow [SETUP.md](SETUP.md). You need an Apple silicon Mac on macOS 14 or later, Xcode 26 with its Metal toolchain, and XcodeGen.
+Follow [SETUP.md](SETUP.md). You need an Apple silicon Mac on macOS 14 or later, Xcode 26 or later, and XcodeGen.
 
 ```bash
 git clone https://github.com/divingsbysangam/sotto.git

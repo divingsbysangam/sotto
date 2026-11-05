@@ -149,7 +149,7 @@ struct RedesignPrototype: View {
             }.pickerStyle(.segmented)
             if settingsSection == "Transcription" {
                 SottoSection(title: "Speech engine", subtitle: "Speech stays on this Mac.") {
-                    LabeledContent("Selected engine", value: "Parakeet TDT v3")
+                    LabeledContent("Selected engine", value: "Whisper Turbo")
                     LabeledContent("Language", value: "Detect automatically")
                     Label("Using Whisper Turbo for automatic language detection.", systemImage: "arrow.triangle.branch")
                         .font(.callout).foregroundStyle(.secondary)

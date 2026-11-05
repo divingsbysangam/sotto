@@ -4,9 +4,9 @@ Guidance for AI coding agents (and people) working in the Sotto repository. The 
 
 ## What this is
 
-Sotto is a native macOS dictation app written in Swift and SwiftUI. It builds with XcodeGen and Xcode, and uses Apple-only frameworks (SwiftUI, AppKit, AVFoundation, Vision, ScreenCaptureKit, Carbon, ServiceManagement) plus WhisperKit, FluidAudio, MLX, Sparkle and HotKey.
+Sotto is a native macOS dictation app written in Swift and SwiftUI. It builds with XcodeGen and Xcode, and uses Apple-only frameworks (SwiftUI, AppKit, AVFoundation, Vision, ScreenCaptureKit, Carbon, ServiceManagement) plus WhisperKit, Sparkle and HotKey.
 
-It needs macOS 14 or later, Xcode 26 with its Metal toolchain, and an Apple silicon Mac. It cannot be built on Linux or in a Linux container.
+It needs macOS 14 or later, Xcode 26 or later, and an Apple silicon Mac. It cannot be built on Linux or in a Linux container.
 
 ## Local-only design
 

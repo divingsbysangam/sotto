@@ -295,7 +295,7 @@ struct AboutView: View {
             }
 
             VStack(spacing: 12) {
-                Text("Sotto transcribes and cleans up speech on this Mac. Whisper Turbo is the default; optional Parakeet and Cohere engines handle English. Send your words to the clipboard, the active app, or Scratchpad. No account or cloud inference is required.")
+                Text("Sotto transcribes and cleans up speech on this Mac with Whisper Turbo. Send your words to the clipboard, the active app, or Scratchpad. No account or cloud inference is required.")
                     .multilineTextAlignment(.center)
                     .foregroundColor(.secondary)
                     .frame(maxWidth: 400)
@@ -305,10 +305,6 @@ struct AboutView: View {
                 Label("WhisperKit on GitHub", systemImage: "cpu")
             }
             .font(.callout)
-
-            Text("Parakeet TDT 0.6B v3 © NVIDIA, CC BY 4.0, converted to Core ML by FluidInference.")
-                .font(.caption)
-                .foregroundColor(.secondary)
 
             Link("Third-party notices", destination: URL(string: "https://github.com/divingsbysangam/sotto/blob/main/THIRD_PARTY_NOTICES.md")!)
                 .font(.callout)
