@@ -119,7 +119,7 @@ struct SottoApp: App {
         .windowStyle(.hiddenTitleBar)
         .windowResizability(.automatic)
         .defaultPosition(.center)
-        .defaultSize(width: 960, height: 760)
+        .defaultSize(width: 1120, height: 820)
         .commands {
             CommandGroup(replacing: .newItem) {
                 Button("Import Audio or Video…") {

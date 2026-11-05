@@ -43,7 +43,7 @@ struct MainWindowView: View {
                 .padding(.horizontal, SottoDesign.spacing * 1.5)
                 .padding(.vertical, SottoDesign.spacing / 2)
         }
-        .frame(minWidth: 700, minHeight: 500)
+        .frame(minWidth: 1000, minHeight: 720)
         .background(SottoDesign.charcoal)
         .tint(SottoDesign.accent)
         .groupBoxStyle(SottoGroupBoxStyle())
