@@ -116,9 +116,10 @@ struct SottoApp: App {
                 NSApp.activate(ignoringOtherApps: true)
             }
         }
+        .windowStyle(.hiddenTitleBar)
         .windowResizability(.automatic)
         .defaultPosition(.center)
-        .defaultSize(width: 700, height: 500)
+        .defaultSize(width: 960, height: 760)
         .commands {
             CommandGroup(replacing: .newItem) {
                 Button("Import Audio or Video…") {
