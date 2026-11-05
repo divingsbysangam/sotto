@@ -16,6 +16,41 @@ final class CursorPositionService {
         return getMousePosition()
     }
 
+    /// The display containing most of the source app's focused window. A hotkey may be pressed
+    /// while the mouse is on another display, so its location is not a reliable capsule target.
+    func focusedWindowScreen(for app: NSRunningApplication?) -> NSScreen? {
+        guard AXIsProcessTrusted(), let app else { return nil }
+        let application = AXUIElementCreateApplication(app.processIdentifier)
+        AXUIElementSetMessagingTimeout(application, 0.25)
+
+        var windowValue: CFTypeRef?
+        guard AXUIElementCopyAttributeValue(application, kAXFocusedWindowAttribute as CFString, &windowValue) == .success,
+              let windowValue, CFGetTypeID(windowValue) == AXUIElementGetTypeID() else { return nil }
+        let window = windowValue as! AXUIElement
+        AXUIElementSetMessagingTimeout(window, 0.25)
+
+        var positionValue: CFTypeRef?
+        var sizeValue: CFTypeRef?
+        guard AXUIElementCopyAttributeValue(window, kAXPositionAttribute as CFString, &positionValue) == .success,
+              AXUIElementCopyAttributeValue(window, kAXSizeAttribute as CFString, &sizeValue) == .success,
+              let positionValue, let sizeValue,
+              CFGetTypeID(positionValue) == AXValueGetTypeID(), CFGetTypeID(sizeValue) == AXValueGetTypeID() else { return nil }
+        var origin = CGPoint.zero
+        var size = CGSize.zero
+        guard AXValueGetValue(positionValue as! AXValue, .cgPoint, &origin),
+              AXValueGetValue(sizeValue as! AXValue, .cgSize, &size),
+              size.width > 0, size.height > 0,
+              let primaryScreen = NSScreen.screens.first else { return nil }
+
+        let windowFrame = CGRect(x: origin.x, y: primaryScreen.frame.maxY - origin.y - size.height,
+                                 width: size.width, height: size.height)
+        let screens = NSScreen.screens
+        guard let index = RecordingIndicatorPlacement.screenIndex(
+            for: windowFrame, screenFrames: screens.map(\.frame)
+        ) else { return nil }
+        return screens[index]
+    }
+
     // MARK: - Accessibility API
 
     private func getAccessibilityCursorPosition() -> CursorPosition? {

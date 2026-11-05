@@ -28,6 +28,21 @@ final class RedesignLifecycleTests: XCTestCase {
         XCTAssertGreaterThanOrEqual(top.x, bounds.minX + 4)
         XCTAssertLessThanOrEqual(top.y + 24, bounds.maxY - 4)
     }
+
+    func testCapsuleUsesFocusedWindowDisplayWhenDisplaysDiffer() {
+        let screens = [CGRect(x: 0, y: 0, width: 1920, height: 1080),
+                       CGRect(x: -1440, y: 0, width: 1440, height: 900)]
+        XCTAssertEqual(RecordingIndicatorPlacement.screenIndex(
+            for: CGRect(x: -1200, y: 150, width: 800, height: 600), screenFrames: screens
+        ), 1)
+        XCTAssertEqual(RecordingIndicatorPlacement.screenIndex(
+            for: CGRect(x: -200, y: 150, width: 1000, height: 600), screenFrames: screens
+        ), 0)
+        XCTAssertNil(RecordingIndicatorPlacement.screenIndex(
+            for: CGRect(x: 4000, y: 0, width: 800, height: 600), screenFrames: screens
+        ))
+    }
+
     func testVocabularyInputPreservesSpellingAndOrderWithoutDuplicateRows() {
         XCTAssertEqual(VocabularyInput.additions(from: "  Sotto, Core ML,\nCore ML, Telugu, ", existing: ["sotto"]), ["Core ML", "Telugu"])
         XCTAssertTrue(VocabularyInput.additions(from: " , \n", existing: []).isEmpty)

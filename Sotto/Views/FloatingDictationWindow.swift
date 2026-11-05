@@ -8,6 +8,7 @@ final class FloatingDictationWindow: NSPanel {
     private let presentation = PanelPresentation()
     private var onCancel: (() -> Void)?
     private var onPasteNow: (() -> Void)?
+    private var preferredScreen: NSScreen?
 
     override var canBecomeKey: Bool { false }
     override var canBecomeMain: Bool { false }
@@ -41,8 +42,9 @@ final class FloatingDictationWindow: NSPanel {
         self.onPasteNow = onPasteNow
     }
 
-    func show(state: DictationState, audioLevel: Float = 0) {
+    func show(state: DictationState, audioLevel: Float = 0, on screen: NSScreen? = nil) {
         let generation = presentation.renew()
+        preferredScreen = screen
         model.state = state
         meter.value = audioLevel
         model.generation = generation
@@ -85,7 +87,7 @@ final class FloatingDictationWindow: NSPanel {
             let size = contentView.fittingSize
             setContentSize(NSSize(width: max(320, size.width), height: max(120, size.height)))
         }
-        guard let screen = NSScreen.main else { return }
+        guard let screen = preferredScreen ?? NSScreen.main else { return }
         setFrameOrigin(NSPoint(x: screen.visibleFrame.maxX - frame.width - 20,
                                y: screen.visibleFrame.midY - frame.height / 2))
     }

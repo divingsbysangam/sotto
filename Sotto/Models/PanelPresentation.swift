@@ -1,6 +1,17 @@
 import Foundation
 
 enum RecordingIndicatorPlacement {
+    static func screenIndex(for windowFrame: CGRect, screenFrames: [CGRect]) -> Int? {
+        let overlaps = screenFrames.map { frame -> CGFloat in
+            let intersection = windowFrame.intersection(frame)
+            return intersection.isNull ? 0 : intersection.width * intersection.height
+        }
+        guard let index = overlaps.indices.max(by: { overlaps[$0] < overlaps[$1] }), overlaps[index] > 0 else {
+            return nil
+        }
+        return index
+    }
+
     static func dotOrigin(at point: CGPoint, visibleFrame: CGRect, size: CGSize) -> CGPoint {
         CGPoint(x: min(max(point.x + 2, visibleFrame.minX + 4), visibleFrame.maxX - size.width - 4),
                 y: min(max(point.y - 28, visibleFrame.minY + 4), visibleFrame.maxY - size.height - 4))
