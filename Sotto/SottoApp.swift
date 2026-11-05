@@ -153,39 +153,12 @@ struct SottoApp: App {
                 }
             }
         } label: {
-            SottoMenuBarIdentity()
+            Image("MenuBarGlassIcon")
+                .resizable()
+                .interpolation(.high)
+                .frame(width: 32, height: 24)
+                .accessibilityLabel("Sotto")
         }
         .menuBarExtraStyle(.window)
-    }
-}
-
-private struct SottoMenuBarIdentity: View {
-    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
-    @Environment(\.colorSchemeContrast) private var contrast
-
-    private var wave: some View {
-        Image("MenuBarIcon")
-            .renderingMode(.template)
-            .resizable()
-            .interpolation(.high)
-            .frame(width: 18, height: 18)
-            .foregroundStyle(.primary)
-            .padding(.horizontal, 6)
-            .padding(.vertical, 3)
-            .accessibilityLabel("Sotto")
-    }
-
-    @ViewBuilder var body: some View {
-        if reduceTransparency || contrast == .increased {
-            wave
-                .background(Color(nsColor: .controlBackgroundColor), in: Capsule())
-                .overlay(Capsule().strokeBorder(Color.primary.opacity(0.4)))
-        } else if #available(macOS 26.0, *) {
-            wave.glassEffect(.regular, in: Capsule())
-        } else {
-            wave
-                .background(.regularMaterial, in: Capsule())
-                .overlay(Capsule().strokeBorder(Color.primary.opacity(0.15)))
-        }
     }
 }

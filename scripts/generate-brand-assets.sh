@@ -15,6 +15,7 @@ MASTER=docs/media/brand/soft-wave-app-master.png
 WAVE=docs/media/brand/soft-wave-menu.svg
 APP_SET=Sotto/Assets.xcassets/AppIcon.appiconset
 MENU_SET=Sotto/Assets.xcassets/MenuBarIcon.imageset
+GLASS_SET=Sotto/Assets.xcassets/MenuBarGlassIcon.imageset
 
 for size in 16 32 128 256 512; do
     magick "$MASTER" -filter Lanczos -resize "${size}x${size}" "$APP_SET/icon_${size}x${size}@1x.png"
@@ -29,6 +30,27 @@ for size in 16 18 32; do
 done
 cp docs/media/brand/menu-wave-18@1x.png "$MENU_SET/menu-wave-18.png"
 cp docs/media/brand/menu-wave-18@2x.png "$MENU_SET/menu-wave-36.png"
+
+brand_tmp="$(mktemp -d)"
+trap 'rm -rf "$brand_tmp"' EXIT
+for appearance in light dark; do
+    if [ "$appearance" = light ]; then
+        wave_source=docs/media/brand/soft-wave-menu-light.svg
+        glass_fill='rgba(20,20,19,0.17)'
+        glass_border='rgba(20,20,19,0.40)'
+    else
+        wave_source="$WAVE"
+        glass_fill='rgba(244,240,230,0.20)'
+        glass_border='rgba(244,240,230,0.55)'
+    fi
+    magick -size 128x96 xc:none -fill "$glass_fill" -stroke "$glass_border" -strokewidth 4 \
+        -draw 'roundrectangle 4,4 123,91 39,39' "$brand_tmp/glass.png"
+    magick -background none "$wave_source" -resize 72x72 "$brand_tmp/wave.png"
+    magick "$brand_tmp/glass.png" "$brand_tmp/wave.png" -geometry +28+12 -composite "$brand_tmp/combined.png"
+    magick "$brand_tmp/combined.png" -filter Lanczos -resize 32x24 "$GLASS_SET/menu-glass-${appearance}-32.png"
+    magick "$brand_tmp/combined.png" -filter Lanczos -resize 64x48 "$GLASS_SET/menu-glass-${appearance}-64.png"
+    cp "$GLASS_SET/menu-glass-${appearance}-64.png" "docs/media/brand/menu-glass-${appearance}@2x.png"
+done
 
 MATRIX=docs/media/brand/size-matrix.png
 magick -size 1000x460 xc:'#E8ECEB' \
@@ -52,4 +74,4 @@ for size in 128 64 32 16; do
         -fill '#AAB7B6' -annotate "+${x}+443" "${size}px" "$MATRIX"
 done
 
-echo "Regenerated AppIcon sizes and cream MenuBarIcon template from reviewed masters."
+echo "Regenerated AppIcon sizes, menu wave exports, and glass menu bar images."
