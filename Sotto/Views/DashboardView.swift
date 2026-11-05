@@ -1,3 +1,4 @@
+import AppKit
 import SwiftUI
 import Combine
 
@@ -16,14 +17,15 @@ struct DashboardView: View {
     var body: some View {
         GeometryReader { geometry in
             ScrollView {
-                VStack(spacing: 24) {
+                VStack(spacing: SottoDesign.spacing) {
+                    header
                     readinessSection
-                    recentTranscriptsSection
                     statsGrid
+                    recentTranscriptsSection
+                    activityAndSourcesSection
                     if let voiceVsKeyboard {
                         VoiceVsKeyboardCard(summary: voiceVsKeyboard)
                     }
-                    activityAndSourcesSection
                 }
                 .padding(responsivePadding(for: geometry.size.width))
             }
@@ -50,40 +52,79 @@ struct DashboardView: View {
         switch width {
         case ..<400: return 12
         case ..<600: return 16
-        default: return 24
+        default: return 16
         }
     }
 
-    private func adaptiveColumns(for width: CGFloat) -> [GridItem] {
-        switch width {
-        case ..<400: return [GridItem(.flexible())]
-        case ..<550: return Array(repeating: GridItem(.flexible()), count: 2)
-        case ..<750: return Array(repeating: GridItem(.flexible()), count: 3)
-        default: return Array(repeating: GridItem(.flexible()), count: 4)
+    private var header: some View {
+        SottoPageHeader(title: "Dashboard", subtitle: Date.now.formatted(.dateTime.weekday(.wide).day().month(.wide))) {
+            Button { onNavigate(.destination(.transcripts)) } label: {
+                Image(systemName: "magnifyingglass")
+                    .frame(width: 22, height: 22)
+            }
+            .buttonStyle(.bordered)
+            .foregroundStyle(SottoDesign.cream)
+            .tint(SottoDesign.cream.opacity(0.2))
+            .help("Search transcripts")
+            .accessibilityLabel("Search transcripts")
+            Button(action: importRecording) {
+                Image(systemName: "square.and.arrow.up")
+                    .frame(width: 22, height: 22)
+            }
+            .buttonStyle(.bordered)
+            .foregroundStyle(SottoDesign.cream)
+            .tint(SottoDesign.cream.opacity(0.2))
+            .help("Import audio or video")
+            .accessibilityLabel("Import audio or video")
         }
+    }
+
+    private func importRecording() {
+        let panel = NSOpenPanel()
+        panel.allowedContentTypes = FileTranscriber.contentTypes
+        panel.allowsMultipleSelection = true
+        panel.message = "Choose recordings to transcribe into Transcripts"
+        if panel.runModal() == .OK { appState.importFiles(panel.urls) }
     }
 
     private var readinessSection: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            LiveDictationStatusView(appState: appState, onNavigate: onNavigate, announcesChanges: true)
-            Divider()
-            SottoShortcutHint(keys: AppSettings.shared.hotkeyDisplayName, instruction: "Hold to dictate into the app you’re using.")
-            SottoShortcutHint(keys: "2×", instruction: "Double-tap your shortcut for hands-free dictation.")
-        }
-        .sottoSurface()
+        LiveDictationStatusView(appState: appState, onNavigate: onNavigate, announcesChanges: true, dashboard: true)
     }
 
     // MARK: - Stats Grid
 
     private var statsGrid: some View {
-        LazyVGrid(columns: adaptiveColumns(for: containerWidth), spacing: 16) {
-            StatCard(title: "Words · 30 days", value: formatNumber(statistics.totalWords), icon: "text.word.spacing", color: accentColor)
-            StatCard(title: "Time Saved", value: formatDuration(statistics.timeSaved), icon: "clock.arrow.circlepath", color: .green)
-            StatCard(title: "Transcripts", value: "\(statistics.transcriptCount)", icon: "doc.text.fill", color: .blue)
-            StatCard(title: "Avg. Speed", value: String(format: "%.0f WPM", statistics.averageWPM), icon: "speedometer", color: .purple)
-            StatCard(title: "Lifetime", value: formatNumber(statistics.lifetimeWords), icon: "infinity", color: .orange)
-            StatCard(title: "Current streak", value: "\(statistics.currentStreak) days", icon: "calendar", color: .secondary)
+        VStack(spacing: SottoDesign.spacing / 2) {
+            HStack(spacing: SottoDesign.spacing / 2) {
+                heroStat("Words · 30 days", value: formatNumber(statistics.totalWords))
+                heroStat("Time Saved · 30 days", value: formatDuration(statistics.timeSaved))
+            }
+            HStack(spacing: SottoDesign.spacing / 2) {
+                compactStat("Transcripts", value: "\(statistics.transcriptCount)")
+                compactStat("Avg Speed", value: String(format: "%.0f", statistics.averageWPM), unit: "WPM")
+                compactStat("Streak", value: "\(statistics.currentStreak)", unit: "days")
+            }
         }
+    }
+
+    private func heroStat(_ title: String, value: String) -> some View {
+        VStack(alignment: .leading, spacing: SottoDesign.spacing / 2) {
+            Text(title).font(.caption).foregroundStyle(.secondary)
+            Text(value).font(.system(size: 34, weight: .semibold, design: .rounded)).minimumScaleFactor(0.7).lineLimit(1)
+        }
+        .frame(maxWidth: .infinity, minHeight: 72, alignment: .leading)
+        .sottoSurface()
+    }
+
+    private func compactStat(_ title: String, value: String, unit: String = "") -> some View {
+        HStack(alignment: .firstTextBaseline, spacing: 3) {
+            Text(title).font(.caption).foregroundStyle(.secondary).lineLimit(1)
+            Spacer(minLength: 4)
+            Text(value).font(.title3.weight(.semibold)).lineLimit(1).minimumScaleFactor(0.7)
+            if !unit.isEmpty { Text(unit).font(.caption2).foregroundStyle(.secondary) }
+        }
+        .frame(maxWidth: .infinity, minHeight: 30)
+        .sottoSurface()
     }
 
     // MARK: - Activity & Sources Section
@@ -92,13 +133,13 @@ struct DashboardView: View {
     private var activityAndSourcesSection: some View {
         if containerWidth < 550 {
             // Stack vertically on narrow screens
-            VStack(spacing: 20) {
+            VStack(spacing: SottoDesign.spacing / 2) {
                 activityChart
                 topSourcesCard
             }
         } else {
             // Side by side on wider screens
-            HStack(alignment: .top, spacing: 20) {
+            HStack(alignment: .top, spacing: SottoDesign.spacing / 2) {
                 activityChart
                 topSourcesCard
             }
@@ -108,44 +149,41 @@ struct DashboardView: View {
     // MARK: - Activity Chart
 
     private var activityChart: some View {
-        let chartHeight: CGFloat = containerWidth < 500 ? 100 : (containerWidth > 800 ? 150 : 120)
-        let barWidth: CGFloat = containerWidth < 400 ? 24 : (containerWidth > 800 ? 40 : 32)
+        let chartHeight: CGFloat = containerWidth < 500 ? 100 : 120
 
-        return VStack(alignment: .leading, spacing: 16) {
+        return VStack(alignment: .leading, spacing: SottoDesign.spacing / 2) {
             HStack {
-                Text("Activity")
-                    .font(.headline)
+                Text("Activity").font(.subheadline.weight(.semibold))
                 Spacer()
-                Text("Last 7 days")
-                    .font(.caption)
+                Text("Last 7 days · words")
+                    .font(.caption2)
                     .foregroundColor(.secondary)
             }
 
-            HStack(alignment: .bottom, spacing: containerWidth < 400 ? 4 : 8) {
+            HStack(alignment: .bottom, spacing: SottoDesign.spacing / 3) {
                 ForEach(statistics.dailyActivity) { day in
-                    VStack(spacing: 8) {
+                    VStack(spacing: 4) {
+                        if Calendar.current.isDateInToday(day.date), day.wordCount > 0 {
+                            Text(formatNumber(day.wordCount))
+                                .font(.caption2.weight(.semibold))
+                                .foregroundStyle(SottoDesign.accent)
+                        }
                         RoundedRectangle(cornerRadius: 4)
                             .fill(barColor(for: day))
-                            .frame(width: barWidth, height: barHeight(for: day, maxHeight: chartHeight - 40))
+                            .frame(maxWidth: 34)
+                            .frame(height: barHeight(for: day, maxHeight: chartHeight - 34))
 
                         Text(dayLabel(for: day.date))
                             .font(.caption2)
-                            .foregroundColor(.secondary)
+                            .foregroundColor(Calendar.current.isDateInToday(day.date) ? .primary : .secondary)
                     }
+                    .frame(maxWidth: .infinity)
                 }
             }
             .frame(height: chartHeight)
             .frame(maxWidth: .infinity)
-
-            HStack {
-                Circle().fill(accentColor).frame(width: 8, height: 8)
-                Text("\(statistics.dailyActivity.reduce(0) { $0 + $1.wordCount }) words this week")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-            }
         }
-        .padding(containerWidth < 400 ? 16 : 20)
-        .background(cardBackground)
+        .sottoSurface()
         .frame(maxWidth: .infinity)
     }
 
@@ -156,8 +194,8 @@ struct DashboardView: View {
     }
 
     private func barColor(for day: DailyActivity) -> Color {
-        if day.wordCount == 0 { return Color.gray.opacity(0.2) }
-        return Calendar.current.isDateInToday(day.date) ? accentColor : accentColor.opacity(0.6)
+        if day.wordCount == 0 { return SottoDesign.cream.opacity(0.08) }
+        return Calendar.current.isDateInToday(day.date) ? accentColor : SottoDesign.cream.opacity(0.14)
     }
 
     private func dayLabel(for date: Date) -> String {
@@ -170,9 +208,13 @@ struct DashboardView: View {
     // MARK: - Top Sources
 
     private var topSourcesCard: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            Text("Top Apps")
-                .font(.headline)
+        VStack(alignment: .leading, spacing: SottoDesign.spacing / 2) {
+            HStack {
+                Text("Top Apps").font(.subheadline.weight(.semibold))
+                Spacer()
+                Text("Share of words · 30 days")
+                    .font(.caption2).foregroundStyle(.secondary)
+            }
 
             if statistics.topSources.isEmpty {
                 VStack(spacing: 8) {
@@ -185,48 +227,49 @@ struct DashboardView: View {
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else {
-                VStack(spacing: 12) {
+                VStack(spacing: SottoDesign.spacing / 2) {
                     ForEach(statistics.topSources.prefix(4)) { source in
-                        HStack {
+                        HStack(spacing: SottoDesign.spacing / 2) {
                             RoundedRectangle(cornerRadius: 6)
-                                .fill(appColor(for: source.appName))
-                                .frame(width: 28, height: 28)
-                                .overlay(Text(String(source.appName.prefix(1))).font(.system(size: 14, weight: .semibold)).foregroundColor(.white))
+                                .fill(SottoDesign.cream.opacity(0.08))
+                                .frame(width: 24, height: 24)
+                                .overlay(Text(String(source.appName.prefix(1))).font(.caption2.weight(.semibold)))
 
                             Text(source.appName)
-                                .font(.subheadline)
+                                .font(.caption)
                                 .lineLimit(1)
-
-                            Spacer()
-
-                            Text(formatNumber(source.wordCount))
-                                .font(.subheadline)
-                                .fontWeight(.medium)
-                                .foregroundColor(.secondary)
+                                .frame(width: 74, alignment: .leading)
+                            GeometryReader { geometry in
+                                ZStack(alignment: .leading) {
+                                    Capsule().fill(SottoDesign.cream.opacity(0.1))
+                                    Capsule().fill(source.id == statistics.topSources.first?.id ? SottoDesign.accent : SottoDesign.cream.opacity(0.5))
+                                        .frame(width: geometry.size.width * sourceShare(source))
+                                }
+                            }
+                            .frame(height: 5)
+                            Text("\(Int((sourceShare(source) * 100).rounded()))%")
+                                .font(.caption2).foregroundStyle(.secondary)
+                                .frame(width: 32, alignment: .trailing)
                         }
                     }
                 }
             }
-            Spacer()
         }
-        .padding(containerWidth < 400 ? 16 : 20)
-        .background(cardBackground)
-        .frame(minWidth: 180, idealWidth: 220, maxWidth: containerWidth < 550 ? .infinity : 300)
-        .frame(minHeight: 180, idealHeight: 200)
+        .sottoSurface()
+        .frame(maxWidth: .infinity, minHeight: 170, alignment: .topLeading)
     }
 
-    private func appColor(for name: String) -> Color {
-        let colors: [Color] = [.blue, .purple, .green, .orange, .pink, .cyan]
-        return colors[abs(name.hashValue) % colors.count]
+    private func sourceShare(_ source: AppUsage) -> CGFloat {
+        let total = statistics.topSources.reduce(0) { $0 + $1.wordCount }
+        return total > 0 ? CGFloat(source.wordCount) / CGFloat(total) : 0
     }
 
     // MARK: - Recent Transcripts
 
     private var recentTranscriptsSection: some View {
-        VStack(alignment: .leading, spacing: 16) {
+        VStack(alignment: .leading, spacing: SottoDesign.spacing / 2) {
             HStack {
-                Text("Recent Transcripts")
-                    .font(.headline)
+                Text("Recent Transcripts").font(.subheadline.weight(.semibold))
                 Spacer()
                 Button("View All") { onNavigate(.destination(.transcripts)) }
                     .buttonStyle(.plain)
@@ -248,24 +291,18 @@ struct DashboardView: View {
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 32)
             } else {
-                VStack(spacing: 1) {
-                    ForEach(recentTranscripts.prefix(5)) { entry in
+                VStack(spacing: 0) {
+                    ForEach(recentTranscripts.prefix(3)) { entry in
                         TranscriptRow(entry: entry, historyManager: historyManager)
+                        if entry.id != recentTranscripts.prefix(3).last?.id { Divider() }
                     }
                 }
             }
         }
-        .padding(20)
-        .background(cardBackground)
+        .sottoSurface()
     }
 
     // MARK: - Helpers
-
-    private var cardBackground: some View {
-        RoundedRectangle(cornerRadius: SottoDesign.cornerRadius)
-            .fill(Color(NSColor.controlBackgroundColor))
-            .overlay(RoundedRectangle(cornerRadius: SottoDesign.cornerRadius).strokeBorder(Color.primary.opacity(0.1)))
-    }
 
     private func loadData() {
         var measuredTypingWPM: Double?
@@ -294,38 +331,6 @@ struct DashboardView: View {
     }
 }
 
-// MARK: - Stat Card
-
-struct StatCard: View {
-    let title: String
-    let value: String
-    let icon: String
-    let color: Color
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Image(systemName: icon)
-                .font(.title3)
-                .foregroundColor(color)
-
-            VStack(alignment: .leading, spacing: 4) {
-                Text(value)
-                    .font(.system(size: 24, weight: .bold, design: .rounded))
-                Text(title)
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-            }
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(16)
-        .background(
-            RoundedRectangle(cornerRadius: 12)
-                .fill(Color(NSColor.controlBackgroundColor))
-                .shadow(color: .black.opacity(0.05), radius: 8, y: 2)
-        )
-    }
-}
-
 // MARK: - Transcript Row
 
 struct TranscriptRow: View {
@@ -333,21 +338,27 @@ struct TranscriptRow: View {
     let historyManager: TranscriptionHistoryManager
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
+        HStack(spacing: SottoDesign.spacing / 2) {
+            RoundedRectangle(cornerRadius: 6)
+                .fill(SottoDesign.cream.opacity(0.08))
+                .frame(width: 24, height: 24)
+                .overlay(Text(String((entry.sourceApp ?? "S").prefix(1))).font(.caption2.weight(.semibold)))
+                .accessibilityHidden(true)
             if entry.isFailed {
                 Label("Dictation needs attention", systemImage: "exclamationmark.triangle.fill")
-                    .font(.subheadline).foregroundStyle(.orange)
+                    .font(.caption).foregroundStyle(SottoDesign.accent)
             } else {
-                Text(entry.text).font(.subheadline).lineLimit(2)
+                Text(entry.text.isEmpty ? "No transcript text" : entry.text).font(.caption).lineLimit(2)
+                    .foregroundStyle(entry.text.isEmpty ? Color.secondary : Color.primary)
                     .frame(maxWidth: .infinity, alignment: .leading)
             }
-            Text([timeString, entry.sourceApp, entry.isFailed ? nil : "\(historyManager.wordCount(for: entry.text)) words"]
+            Text([entry.sourceApp, entry.isFailed ? nil : "\(historyManager.wordCount(for: entry.text)) words"]
                 .compactMap { $0 }.joined(separator: " · "))
-                .font(.caption).foregroundStyle(.secondary).lineLimit(2)
+                .font(.caption2).foregroundStyle(.secondary).lineLimit(1)
+            Text(timeString).font(.caption2).foregroundStyle(.secondary)
+                .frame(minWidth: 54, alignment: .trailing)
         }
-        .padding(.vertical, 10)
-        .padding(.horizontal, 4)
-        .background(Color(NSColor.controlBackgroundColor).opacity(0.5))
+        .padding(.vertical, SottoDesign.spacing / 2)
     }
 
     private var timeString: String {
