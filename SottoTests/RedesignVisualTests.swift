@@ -79,9 +79,7 @@ final class RedesignVisualTests: XCTestCase {
         for (name, view, size, dark) in cases {
             try await capture(view, named: name, size: size, dark: dark, directory: directory)
         }
-        TranscriptionEngineManager.shared.select(.parakeet)
-        try await capture(main(.settings(.transcription)), named: "settings-fallback", size: .init(width: 700, height: 650), dark: false, directory: directory)
-        TranscriptionEngineManager.shared.select(.whisper)
+        try await capture(main(.settings(.transcription)), named: "settings-whisper", size: .init(width: 700, height: 650), dark: false, directory: directory)
     }
 
     @MainActor private func capture(_ view: AnyView, named name: String, size: CGSize, dark: Bool, directory: URL) async throws {

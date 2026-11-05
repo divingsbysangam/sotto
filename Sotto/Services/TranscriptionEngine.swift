@@ -1,18 +1,12 @@
 import Foundation
 
 enum SpeechEngineID: String, Codable, CaseIterable, Identifiable {
-    case whisper, parakeet, cohere
+    case whisper
     var id: String { rawValue }
-    var displayName: String {
-        switch self {
-        case .whisper: return "Whisper Turbo (Default)"
-        case .parakeet: return "Parakeet TDT v3 (Fast)"
-        case .cohere: return "Cohere Transcribe (Max accuracy)"
-        }
-    }
+    var displayName: String { "Whisper Turbo" }
 
     static func effective(selected: Self, languageMode: DictationLanguageMode, translate: Bool = false) -> Self {
-        translate || languageMode != .english ? .whisper : selected
+        .whisper
     }
 }
 
@@ -25,7 +19,6 @@ struct SpeechEngineCapabilities {
     let livePreview: Bool
     let translation: Bool
     static let whisper = Self(livePreview: true, translation: true)
-    static let english = Self(livePreview: false, translation: false)
 }
 
 protocol TranscriptionEngine: AnyObject {
@@ -44,8 +37,7 @@ protocol TranscriptionEngine: AnyObject {
     @MainActor func unload() async
 }
 
-/// Shared by speech inference and MLX cleanup. Holding this gate includes model loading and
-/// unloading: neither GPU cache clearing nor a model switch can race an in-flight decode.
+/// Serializes speech inference and model loading so two operations cannot race a decode.
 @MainActor
 final class ModelWorkGate {
     static let shared = ModelWorkGate()

@@ -1,8 +1,7 @@
 import Foundation
 import Observation
 
-/// Routes local recognition and owns model lifetime. Operations reserve an engine at their
-/// start; switching Settings cannot change engines halfway through an imported file.
+/// Routes local Whisper recognition. Operations retain a stable engine for imported files.
 @Observable
 final class TranscriptionEngineManager {
     static let shared = TranscriptionEngineManager()
@@ -14,7 +13,6 @@ final class TranscriptionEngineManager {
     private(set) var operationCount = 0
     private(set) var maintenanceError: String?
     @ObservationIgnored private var reservations: [UUID: SpeechEngineID] = [:]
-    @ObservationIgnored private var removals: Set<SpeechEngineID> = []
 
     struct Operation {
         let token: UUID
@@ -26,9 +24,7 @@ final class TranscriptionEngineManager {
     }
     var engine: any TranscriptionEngine { engines[activeID ?? effectiveID]! }
     var selectedEngine: any TranscriptionEngine { engines[selectedID]! }
-    var fallbackNotice: String? {
-        effectiveID != selectedID ? "Using Whisper Turbo for automatic language detection and non-English dictation." : nil
-    }
+    var fallbackNotice: String? { nil }
     var livePreviewAvailable: Bool { engines[effectiveID]!.capabilities.livePreview }
 
     func engine(for id: SpeechEngineID) -> any TranscriptionEngine { engines[id]! }
@@ -44,12 +40,9 @@ final class TranscriptionEngineManager {
 
     init(settings: AppSettings = .shared, engines: [SpeechEngineID: any TranscriptionEngine]? = nil) {
         self.settings = settings
-        selectedID = settings.speechEngine
-        self.engines = engines ?? [
-            .whisper: WhisperTranscriptionEngine(),
-            .parakeet: OptionalSpeechEngine(id: .parakeet, runtime: ParakeetTranscriptionService()),
-            .cohere: OptionalSpeechEngine(id: .cohere, runtime: CohereTranscriptionService()),
-        ]
+        selectedID = .whisper
+        settings.speechEngine = .whisper
+        self.engines = engines ?? [.whisper: WhisperTranscriptionEngine()]
     }
 
     @MainActor func beginOperation() -> Operation {
@@ -62,58 +55,16 @@ final class TranscriptionEngineManager {
     @MainActor func endOperation(_ operation: Operation) {
         reservations.removeValue(forKey: operation.token)
         operationCount = reservations.count
-        if operationCount == 0 { scheduleMaintenance() }
     }
 
     @MainActor func select(_ id: SpeechEngineID) {
         selectedID = id
         settings.speechEngine = id
-        if operationCount == 0 { scheduleMaintenance() }
-    }
-
-    @MainActor func requestRemoval(_ id: SpeechEngineID) {
-        guard id != .whisper else { return }
-        removals.insert(id)
-        scheduleMaintenance()
-    }
-
-    @MainActor func removalPending(_ id: SpeechEngineID) -> Bool { removals.contains(id) }
-
-    @MainActor private func scheduleMaintenance() {
-        Task {
-            await ModelWorkGate.shared.acquire()
-            defer { ModelWorkGate.shared.release() }
-            guard reservations.isEmpty else { return }
-            maintenanceError = nil
-            for id in removals {
-                do {
-                    try await (engines[id] as? OptionalSpeechEngine)?.remove()
-                    if activeID == id { activeID = nil }
-                    removals.remove(id)
-                } catch { maintenanceError = error.localizedDescription }
-            }
-            if let activeID, activeID != effectiveID {
-                guard activeID != .whisper || LocalTranscriptionService.shared.canRetry else {
-                    maintenanceError = "A previous model load timed out. Quit and reopen Sotto before switching engines."
-                    return
-                }
-                await engines[activeID]!.unload()
-                self.activeID = nil
-            }
-        }
     }
 
     @MainActor private func activate(_ id: SpeechEngineID) async throws -> any TranscriptionEngine {
         let next = engines[id]!
-        if let activeID, activeID != id {
-            guard activeID != .whisper || LocalTranscriptionService.shared.canRetry else {
-                throw LocalTranscriptionError.modelUnavailable("A previous model load timed out. Quit and reopen Sotto before switching engines.")
-            }
-            await engines[activeID]!.unload()
-        }
         activeID = id
-        // Don't retain the optional cleanup LLM while loading the larger speech model.
-        if id == .cohere { LocalLLMService.shared.unloadWhileLocked() }
         try await next.prepare()
         try Task.checkCancellation()
         return next
@@ -122,8 +73,6 @@ final class TranscriptionEngineManager {
     @MainActor
     func prepare(retry: Bool = false) async {
         let id = effectiveID
-        // Optional models are downloaded only by their explicit Settings button.
-        guard id == .whisper || SpeechModelStore.isInstalled(id) else { return }
         await ModelWorkGate.shared.acquire()
         defer { ModelWorkGate.shared.release() }
         if retry && id == .whisper { await LocalTranscriptionService.shared.retryLoad() }

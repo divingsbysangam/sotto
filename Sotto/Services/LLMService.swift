@@ -95,11 +95,9 @@ final class LLMService {
         let siteLabel = websiteURL?.host ?? "none"
         Self.logger.notice("start app=\(appLabel, privacy: .public) site=\(siteLabel, privacy: .public) mode=\(resolved.label, privacy: .public) in=\(trimmed.count, privacy: .public) context selected=\(context.selectedText?.count ?? 0, privacy: .public) clipboard=\(context.clipboardText?.count ?? 0, privacy: .public) screen=\(context.screenText?.count ?? 0, privacy: .public)")
 
-        // Order: Apple's on-device model → the optional local LLM (L5) → rule-based.
+        // Apple's on-device model, then deterministic rule-based cleanup.
         #if canImport(FoundationModels)
-        if Self.forceLocalLLM {
-            Self.logger.notice("engine=FoundationModels skipped (forceLocalLLM)")
-        } else if #available(macOS 26.0, *) {
+        if #available(macOS 26.0, *) {
             switch await cleanUsingFoundationModels(trimmed, context: context, resolved: resolved, protectedTokens: protectedTokens, language: language) {
             case .accepted(let cleaned):
                 Self.logger.notice("mode=\(resolved.label, privacy: .public) engine=FoundationModels guard=accepted in=\(trimmed.count, privacy: .public) out=\(cleaned.count, privacy: .public)")
@@ -115,18 +113,6 @@ final class LLMService {
         #else
         Self.logger.notice("engine=FoundationModels unavailable reason=built without FoundationModels SDK")
         #endif
-
-        if LocalLLMService.shared.isUsable {
-            switch await cleanUsingLocalModel(trimmed, context: context, resolved: resolved, protectedTokens: protectedTokens, language: language) {
-            case .accepted(let cleaned):
-                Self.logger.notice("mode=\(resolved.label, privacy: .public) engine=LocalLLM guard=accepted in=\(trimmed.count, privacy: .public) out=\(cleaned.count, privacy: .public)")
-                return cleaned
-            case .rejected(let reason):
-                Self.logger.notice("mode=\(resolved.label, privacy: .public) engine=LocalLLM guard=rejected reason=\(reason, privacy: .public); falling back to rule-based cleaner")
-            case .failed(let reason):
-                Self.logger.notice("mode=\(resolved.label, privacy: .public) engine=LocalLLM failed reason=\(reason, privacy: .public); falling back to rule-based cleaner")
-            }
-        }
 
         // Fallback: fully local, deterministic rule-based cleanup.
         let cleaned = RuleBasedCleaner.clean(trimmed, language: language)
@@ -393,37 +379,6 @@ final class LLMService {
             }
         }
         return .accepted(cleaned)
-    }
-
-    // MARK: - Local LLM (L5)
-
-    /// Testing on a Mac with Apple Intelligence: `defaults write com.divingsbysangam.sotto forceLocalLLM -bool YES`
-    /// skips Foundation Models so the local model runs. No UI.
-    static var forceLocalLLM: Bool { UserDefaults.standard.bool(forKey: "forceLocalLLM") }
-
-    /// Same prompts as Foundation Models; the dictation goes between markers (see LocalLLMService).
-    private func cleanUsingLocalModel(
-        _ text: String,
-        context: CleanupContext,
-        resolved: ResolvedInstructions,
-        protectedTokens: [String],
-        language: String?
-    ) async -> ModelOutcome {
-        let rules = Self.formattingRules(for: text, hasPlaceholders: !protectedTokens.isEmpty, language: language)
-        var systemPrompt = resolved.modeApplied
-            ? Self.modeSystemPrompt(instructions: resolved.text, rules: rules, examples: resolved.examples)
-            : Self.conservativeSystemPrompt(instructions: resolved.text, rules: rules)
-        if let reference = Self.referenceSection(context, dictation: text) {
-            systemPrompt += "\n\n" + reference
-        }
-        do {
-            let cleaned = try await withTimeout(seconds: 20, operation: "Local LLM cleanup") {
-                try await LocalLLMService.shared.respond(system: systemPrompt, dictation: text)
-            }
-            return Self.validate(cleaned, original: text, resolved: resolved, protectedTokens: protectedTokens, strict: true)
-        } catch {
-            return .failed(reason: error.localizedDescription)
-        }
     }
 
     private static func conservativeSystemPrompt(instructions: String, rules: String) -> String {

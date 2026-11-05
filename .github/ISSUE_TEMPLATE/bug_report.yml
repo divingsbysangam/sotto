@@ -45,8 +45,6 @@ body:
       label: Speech engine
       options:
         - Whisper Large v3 Turbo (default)
-        - Parakeet TDT v3
-        - Cohere Transcribe
         - Not sure / not related
     validations:
       required: true

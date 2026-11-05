@@ -383,7 +383,7 @@ final class AppSettings {
         defaults.set(try? JSONEncoder().encode(value), forKey: key)
     }
 
-    /// Whisper fallback is always Turbo; optional engines have their own pinned models.
+    /// Sotto uses the pinned Whisper Turbo model for recognition.
     var whisperModel: WhisperModel { .largev3Turbo }
 
     var speechEngine: SpeechEngineID {
@@ -550,12 +550,6 @@ final class AppSettings {
     var liveTextEnabled: Bool {
         get { defaults.bool(forKey: "liveTextEnabled") }
         set { defaults.set(newValue, forKey: "liveTextEnabled") }
-    }
-
-    /// L5: use the downloaded local cleanup model when Apple Intelligence isn't available.
-    var localLLMEnabled: Bool {
-        get { defaults.object(forKey: "localLLMEnabled") as? Bool ?? true }
-        set { defaults.set(newValue, forKey: "localLLMEnabled") }
     }
 
     /// L6: the coding-agent voice relay (off by default). Turning it off is the kill switch.

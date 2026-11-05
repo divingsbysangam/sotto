@@ -37,12 +37,6 @@ if ! command -v xcodebuild >/dev/null 2>&1 || ! xcodebuild -version >/dev/null 2
     echo "     sudo xcode-select -s /Applications/Xcode.app/Contents/Developer"
     exit 1
 fi
-# mlx-swift compiles Metal kernels, which needs Xcode's separately downloaded Metal toolchain.
-if ! xcrun metal --version >/dev/null 2>&1; then
-    echo "❌ Xcode's Metal toolchain is missing. Install it once:"
-    echo "     xcodebuild -downloadComponent MetalToolchain"
-    exit 1
-fi
 
 echo "📍 Generating Sotto.xcodeproj from project.yml..."
 xcodegen generate >/dev/null
@@ -53,7 +47,7 @@ ARGS=(
     -configuration "$CONFIGURATION"
     -destination 'platform=macOS,arch=arm64'
     -derivedDataPath "$DERIVED"
-    # Package plugins and macros (mlx-swift, swift-transformers) are trusted without Xcode's prompt.
+    # Keep package validation noninteractive for command-line builds.
     -skipPackagePluginValidation -skipMacroValidation
 )
 if [ -n "${RESULT_BUNDLE_PATH:-}" ]; then

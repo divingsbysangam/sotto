@@ -117,18 +117,12 @@ else
 fi
 
 # Step 3: Build
-# L5: mlx-swift compiles Metal kernels, which needs Xcode's Metal Toolchain component.
-if ! xcrun -f metal >/dev/null 2>&1 || ! xcrun metal --version >/dev/null 2>&1; then
-    echo "❌ Xcode's Metal Toolchain is missing (needed to build MLX for the local cleanup model)."
-    echo "   Install it once: xcodebuild -downloadComponent MetalToolchain"
-    exit 1
-fi
 echo "📍 Step 3: Building Release..."
 # Capture full log; surface errors/warnings and fail if xcodebuild fails.
 BUILD_LOG="$(mktemp)"
 trap 'rm -f "$BUILD_LOG"' EXIT
 set +e
-# Package plugins/macros (mlx-swift, swift-transformers) are trusted without Xcode's prompt.
+# Keep package validation noninteractive for command-line builds.
 xcodebuild "${BUILD_OPTIONS[@]}" \
     -skipPackagePluginValidation -skipMacroValidation build >"$BUILD_LOG" 2>&1
 BUILD_STATUS=$?

@@ -8,7 +8,7 @@
 # Sparkle compares the build number, so it must increase with every release.
 #
 # Prerequisites:
-#   - xcodegen, and Xcode 26 with its Metal toolchain
+#   - xcodegen and Xcode 26 or later
 #   - the self-signed identity from scripts/create-signing-cert.sh
 #   - the Sparkle EdDSA private key in your login keychain (Sparkle's generate_keys), or a key file
 #     given as SPARKLE_KEY_FILE=/path/to/key. Never commit the key.
@@ -53,11 +53,6 @@ if ! security find-identity -v -p codesigning 2>/dev/null | grep -qF "$SIGN_IDEN
     echo "❌ Signing identity '$SIGN_IDENTITY' not found. Run ./scripts/create-signing-cert.sh"
     exit 1
 fi
-if ! xcrun metal --version >/dev/null 2>&1; then
-    echo "❌ Xcode's Metal toolchain is missing: xcodebuild -downloadComponent MetalToolchain"
-    exit 1
-fi
-
 OUT_DIR="$PROJECT_DIR/build/release"
 DERIVED="${SOTTO_DERIVED_DATA_PATH:-$OUT_DIR/DerivedData}"
 RELEASE_DIR="$OUT_DIR/$TAG"

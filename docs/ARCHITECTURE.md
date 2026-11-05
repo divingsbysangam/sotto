@@ -4,7 +4,7 @@ Sotto is a macOS app for voice dictation. You hold a key, speak, and the text ap
 
 Everything runs on your Mac. There are no accounts, no API keys, no cloud services and no telemetry. The only network traffic is model downloads you ask for, and Sparkle update checks. Please keep it that way: do not add hosted inference, auth gating or analytics.
 
-This page is the map for contributors. Build instructions are in [SETUP.md](../SETUP.md). The speech engines have their own page: [local-speech-engines.md](local-speech-engines.md).
+This page is the map for contributors. Build instructions are in [SETUP.md](../SETUP.md).
 
 ## Stack
 
@@ -14,8 +14,8 @@ This page is the map for contributors. Build instructions are in [SETUP.md](../S
 | App shape | Dock and menu-bar app, state in `@Observable` objects |
 | Project generation | XcodeGen (`project.yml` generates `Sotto.xcodeproj`) |
 | Audio | AVFoundation (`AVAudioEngine`) |
-| Speech | WhisperKit (default), FluidAudio (Parakeet + Silero VAD), MLXAudio (Cohere) |
-| Text cleanup | Apple Foundation Models on macOS 26+, an optional local MLX model, or a rule-based cleaner |
+| Speech | WhisperKit |
+| Text cleanup | Apple Foundation Models on macOS 26+, or a rule-based cleaner |
 | Screen context | Apple Vision OCR on a ScreenCaptureKit capture |
 | Hotkeys | HotKey package plus a CGEventTap for modifier-only keys |
 | Updates | Sparkle |
@@ -26,10 +26,10 @@ This page is the map for contributors. Build instructions are in [SETUP.md](../S
 hotkey down ─► RecordingService (mic → WAV)
 hotkey up   ─► short audio tail, then stop
             ─► TranscriptionEngineManager.transcribe
-                 engine: Whisper | Parakeet | Cohere
+                 engine: Whisper Turbo
                  → vocabulary spelling → replacements
             ─► snippets (placeholders) → voice commands
-            ─► LLMService cleanup (Foundation Models → local MLX → rule-based)
+            ─► LLMService cleanup (Foundation Models → rule-based)
             ─► snippet blocks expanded
             ─► OutputService: caret-aware casing/spacing, then paste or copy
             ─► HistoryManager / HistoryStore
@@ -56,10 +56,7 @@ Sotto/
     RecordingService.swift, AudioInputDevices.swift, AudioArchive.swift
     TranscriptionEngine.swift, TranscriptionEngineManager.swift
     LocalTranscriptionService.swift        WhisperKit
-    ParakeetTranscriptionService.swift     FluidAudio
-    CohereTranscriptionService.swift       MLXAudio
-    SpeechModelStore.swift, OptionalSpeechEngine.swift, SpeechRuntime.swift
-    LLMService.swift, LocalLLMService.swift   cleanup (Foundation Models / MLX)
+    LLMService.swift                       cleanup (Foundation Models / rules)
     DictationTextRules.swift               pure text rules
     HotkeyManager.swift, HotkeyGestureClassifier.swift, ModifierKeyMonitor.swift
     OutputService.swift, CursorPositionService.swift, CorrectionWatcher.swift
@@ -69,22 +66,20 @@ Sotto/
     AgentRelayService.swift, AgentRelayProtocol.swift
     SpeechService.swift                    read aloud
   Views/                     SwiftUI views and the capsule / caret-dot windows
-  Resources/                 app-catalog.json, model manifests
+  Resources/                 app-catalog.json, Whisper model manifest
 SottoCLI/                    `sotto` command-line helper (history, agent hook)
 SottoTests/                  unit tests
-SottoSpeechProbe/            developer tool for speech-engine checks
 scripts/                     build, signing, release and maintenance scripts
 ```
 
-## Speech engines
+## Speech engine
 
-`TranscriptionEngine` is the shared interface. `TranscriptionEngineManager` routes a request to the selected engine, falls back to Whisper where an optional engine can't help (language detection, non-English speech, translation), and applies vocabulary corrections for every engine.
+`TranscriptionEngine` is the shared interface. `TranscriptionEngineManager` routes dictation and imports to Whisper and applies vocabulary corrections.
 
-- **Whisper Large v3 Turbo** is the default. It is the only engine used for live preview.
-- **Parakeet TDT v3** and **Cohere Transcribe** are optional, English-focused, and downloaded on request.
-- One model is in memory at a time. Unused engines unload when you switch. Transcriptions run one at a time.
+- **Whisper Large v3 Turbo** handles dictation, imports, language detection, translation, and live preview.
+- Transcriptions run one at a time.
 
-Model files are pinned. `Resources/model-manifest.json` and `Resources/speech-model-manifest.json` record the upstream revision, byte count and SHA-256 of every file. The app verifies them before loading, and a mismatch triggers a repair download instead of loading the file. After changing a model, regenerate the manifest with `scripts/update-speech-model-manifest.py` and review the diff. Never resolve model revisions dynamically in the shipping app.
+Model files are pinned. `Resources/model-manifest.json` records the upstream revision, byte count and SHA-256 of every file. The app verifies them before loading, and a mismatch triggers a repair download instead of loading the file. Never resolve model revisions dynamically in the shipping app.
 
 ## Hotkeys
 
@@ -104,7 +99,7 @@ An `AppMode` selects cleanup instructions by the frontmost app, the website (rea
 
 ## Cleanup
 
-`LLMService` tries Apple Foundation Models, then the optional local Qwen model, then `RuleBasedCleaner`. Every model output passes `LLMService.validate`, which rejects outputs that drop snippet placeholders, repeat Sotto's own prompt wording, copy a prompt example, come back empty, or rewrite more than a light edit allows. Rejected output falls back to the rule-based cleaner. Selected or recently copied text can be given to the cleaner as spelling context only. It is never pasted, saved or logged.
+`LLMService` tries Apple Foundation Models, then `RuleBasedCleaner`. Model output passes `LLMService.validate`, which rejects outputs that drop snippet placeholders, repeat Sotto's own prompt wording, copy a prompt example, come back empty, or rewrite more than a light edit allows. Rejected output falls back to the rule-based cleaner. Selected or recently copied text can be given to the cleaner as spelling context only. It is never pasted, saved or logged.
 
 ## Paste safety
 

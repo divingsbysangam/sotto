@@ -416,7 +416,6 @@ struct FileNameSettings: View {
 
 struct LiveTextSettings: View {
     var settings: AppSettings
-    var languageMode: DictationLanguageMode
 
     @State private var enabled = false
 
@@ -424,11 +423,6 @@ struct LiveTextSettings: View {
         GroupBox {
             VStack(alignment: .leading, spacing: 12) {
                 Toggle("Show live text while speaking", isOn: $enabled)
-                    .disabled(SpeechEngineID.effective(selected: TranscriptionEngineManager.shared.selectedID, languageMode: languageMode) != .whisper)
-                if SpeechEngineID.effective(selected: TranscriptionEngineManager.shared.selectedID, languageMode: languageMode) != .whisper {
-                    Text("Live text is available with Whisper Turbo. Your preference is retained.")
-                        .font(.caption).foregroundStyle(.secondary)
-                }
                 Text("The capsule shows the words heard so far, updated every 1.5 seconds. The pasted text still comes from a full pass over the whole recording once you stop. Uses the same model (no extra memory); on some Macs the paste can be a fraction of a second later. Needs the Minimal recording indicator.")
                     .font(.caption)
                     .foregroundColor(.secondary)
@@ -437,89 +431,6 @@ struct LiveTextSettings: View {
         }
         .onAppear { enabled = settings.liveTextEnabled }
         .onChange(of: enabled) { _, on in settings.liveTextEnabled = on }
-    }
-}
-
-// MARK: - L5 Local cleanup model
-
-struct LocalLLMSettings: View {
-    var settings: AppSettings
-
-    @State private var enabled = true
-    private var service: LocalLLMService { .shared }
-
-    private var sizeText: String {
-        ByteCountFormatter.string(fromByteCount: LocalLLMService.totalBytes, countStyle: .file)
-    }
-
-    var body: some View {
-        GroupBox {
-            VStack(alignment: .leading, spacing: 12) {
-                Text("Local Cleanup Model")
-                    .font(.headline)
-
-                Text(LLMService.foundationModelsAvailable && !LLMService.forceLocalLLM
-                     ? "Apple Intelligence is cleaning up your dictations. This optional model is only used on Macs without it, or if Apple Intelligence can't handle a dictation."
-                     : "Apple Intelligence isn't available on this Mac, so cleanup uses a built-in rule-based cleaner. This optional model cleans up grammar and fillers much better, entirely on this Mac.")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-                    .fixedSize(horizontal: false, vertical: true)
-
-                switch service.state {
-                case .notInstalled:
-                    HStack {
-                        Text("\(LocalLLMService.displayName) · \(sizeText)")
-                            .font(.caption)
-                        Spacer()
-                        Button("Download") { service.download() }
-                    }
-                case .downloading(let fraction):
-                    HStack {
-                        ProgressView(value: fraction)
-                        Text("\(Int(fraction * 100))%")
-                            .font(.system(.caption, design: .monospaced))
-                        Button("Cancel") { service.cancelDownload() }
-                    }
-                case .installed:
-                    Toggle("Use it for cleanup when Apple Intelligence isn't available", isOn: $enabled)
-                    HStack {
-                        Text(installedLine)
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                        Spacer()
-                        Button("Remove") { service.remove() }
-                    }
-                case .failed(let message):
-                    HStack {
-                        Text("⚠︎ \(message)")
-                            .font(.caption)
-                            .foregroundColor(.orange)
-                        Spacer()
-                        Button("Try Again") { service.download() }
-                    }
-                }
-
-                Text("Runs next to the Whisper model and adds about 1 GB of memory while loaded; it unloads after 10 minutes without use. Prompt mode and Command mode still need Apple Intelligence.")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-                    .fixedSize(horizontal: false, vertical: true)
-            }
-        }
-        .onAppear { enabled = settings.localLLMEnabled }
-        .onChange(of: enabled) { _, on in
-            settings.localLLMEnabled = on
-            if !on { service.unload() }
-        }
-    }
-
-    private var installedLine: String {
-        var parts = ["\(LocalLLMService.displayName) · \(sizeText) on disk"]
-        if let memory = service.measuredMemoryMB {
-            parts.append(String(format: "%.0f MB in memory%@", memory, service.isLoaded ? "" : " when loaded"))
-        } else {
-            parts.append("not loaded yet")
-        }
-        return parts.joined(separator: " · ")
     }
 }
 

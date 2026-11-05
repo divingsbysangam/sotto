@@ -49,16 +49,13 @@ The build-only script generates the Xcode project, then builds without signing o
 
 ## Dictation and local models
 
-Whisper Large v3 Turbo is the default speech engine. It supports language detection, non-English speech, translation fallback, and live preview. Parakeet TDT v3 and Cohere Transcribe q4 are optional engines for English dictation and file imports. You choose when to download and load them. Text cleanup uses Apple Foundation Models on supported Macs, an optional local Qwen model, or built-in rules.
+Whisper Large v3 Turbo is Sotto's speech engine. It supports language detection, non-English speech, translation fallback, and live preview. Text cleanup uses Apple Foundation Models on supported Macs or built-in rules.
 
 | Model | Download | Use |
 |---|---:|---|
-| Whisper Large v3 Turbo | About 1.6 GB | Default speech engine |
-| Parakeet TDT v3 | About 0.5 GB | Optional English dictation and imports |
-| Cohere Transcribe q4 | About 1.5 GB | Optional English dictation and imports |
-| Qwen2.5 1.5B Instruct, 4-bit | About 0.9 GB | Optional text cleanup |
+| Whisper Large v3 Turbo | About 1.6 GB | Dictation and imports |
 
-Model downloads are pinned by revision and SHA-256. After installation, dictation works offline. See [local speech engines](docs/local-speech-engines.md) and [third-party notices](THIRD_PARTY_NOTICES.md) for model sources and licenses.
+The model download is pinned by revision and SHA-256. After installation, dictation works offline. See [third-party notices](THIRD_PARTY_NOTICES.md) for model sources and licenses.
 
 ## Permissions
 
@@ -78,7 +75,7 @@ You can review or revoke these in **System Settings → Privacy & Security**. Pe
 
 **Does Sotto send recordings to a server?** No. Recognition and cleanup run on your Mac. Model downloads and update checks are the only network uses.
 
-**Why is the first download large?** Whisper is a local model, so Sotto downloads its files once instead of sending speech to a hosted service. Optional models download only when you request them.
+**Why is the first download large?** Whisper is a local model, so Sotto downloads its files once instead of sending speech to a hosted service.
 
 **Why does macOS ask for permissions again after a rebuild?** macOS associates grants with the app's signature and bundle ID. Use the stable self-signed identity and install script in [SETUP.md](SETUP.md). The first public build uses a new bundle ID, so existing private builds need fresh grants once.
 
@@ -88,6 +85,6 @@ You can review or revoke these in **System Settings → Privacy & Security**. Pe
 
 ## Project and credits
 
-Sotto is built with SwiftUI, WhisperKit, FluidAudio, MLX, Sparkle, and HotKey. The model authors and converters are credited in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md). See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the code structure, [CONTRIBUTING.md](CONTRIBUTING.md) to help, and [SECURITY.md](SECURITY.md) to report a vulnerability privately.
+Sotto is built with SwiftUI, WhisperKit, Sparkle, and HotKey. The model authors and converters are credited in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md). See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the code structure, [CONTRIBUTING.md](CONTRIBUTING.md) to help, and [SECURITY.md](SECURITY.md) to report a vulnerability privately.
 
 Sotto's own source is [MIT licensed](LICENSE). Dependencies and downloaded models retain their own licenses.

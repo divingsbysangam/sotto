@@ -7,7 +7,7 @@ Sotto turns your voice into text on your Mac. It has no accounts, no analytics a
 - **Audio** is recorded to a temporary file and deleted after each dictation. If you cancel a recording of 20 seconds or more, it is held for 10 seconds so you can undo the cancel, then deleted. You can opt in to keeping recordings for a day, a week or forever (Settings → General → History & Audio). They are off by default.
 - **Transcripts** are saved to a local history so you can search, copy and re-run them. You choose how long they are kept (1 day, 1 week, 1 month or forever). Deleting a transcript also deletes its kept audio.
 - **Vocabulary, replacements, snippets, App Modes and Scratchpad notes** are stored locally.
-- **Speech recognition** runs on-device with Whisper by default, or with Parakeet or Cohere Transcribe if you install them.
+- **Speech recognition** runs on-device with Whisper.
 - **Text cleanup** runs on-device: Apple Foundation Models (on macOS 26 or later with Apple Intelligence), an optional local model you download, or a built-in rule-based cleaner. Nothing is sent to a hosted AI service.
 - **Screen context** (optional) reads text on your screen with Apple's Vision framework to improve spelling. The screenshot and the text stay on your Mac.
 - **Selected and recently copied text** (optional) can be used as spelling context for cleanup. It is not pasted, saved or logged.
@@ -19,7 +19,7 @@ Where things are stored is listed in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md
 
 Sotto contacts the network only for these two things:
 
-1. **Model downloads from Hugging Face** (`huggingface.co`). This happens when you ask for it: Whisper the first time you use it, and the optional Parakeet, Cohere and cleanup models when you choose Download. Hugging Face sees the usual request details, such as your IP address and which file is requested. The files are checked against pinned SHA-256 hashes. No audio or text is uploaded.
+1. **Model downloads from Hugging Face** (`huggingface.co`). This happens for Whisper the first time you use it. Hugging Face sees the usual request details, such as your IP address and which file is requested. The files are checked against pinned SHA-256 hashes. No audio or text is uploaded.
 2. **Update checks** through Sparkle. The app fetches an appcast file from this project's GitHub repository (`raw.githubusercontent.com`) and downloads updates from GitHub Releases. GitHub sees the usual request details, and the request identifies the app and its version. Sotto does not enable Sparkle's system profiling, so no hardware profile is sent.
 
 After the models are installed, dictation works with no network connection.
