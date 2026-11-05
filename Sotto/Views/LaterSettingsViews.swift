@@ -276,6 +276,7 @@ struct CommandLineToolSettings: View {
                             CommandLineToolInstaller.uninstall()
                             self.link = CommandLineToolInstaller.installedLink
                         }
+                        .tint(SottoDesign.cream.opacity(0.75))
                     }
                     if !CommandLineToolInstaller.isOnPath(link.deletingLastPathComponent()) {
                         Text("Add it to your PATH: echo 'export PATH=\"$HOME/.local/bin:$PATH\"' >> ~/.zshrc")
@@ -291,6 +292,7 @@ struct CommandLineToolSettings: View {
                             errorMessage = error.localizedDescription
                         }
                     }
+                    .sottoPrimaryAction()
                 }
 
                 if let errorMessage {
@@ -471,6 +473,7 @@ struct AgentRelaySettings: View {
                             copy(AgentRelayService.snippet(AgentRelayService.claudeHooks(timeout: timeout), cursor: false))
                         }
                     }
+                    .tint(SottoDesign.cream.opacity(0.75))
                     HStack {
                         Button("Add to Cursor") {
                             install(AgentRelayService.cursorHooks(), into: AgentRelayService.cursorHooksURL, cursor: true)
@@ -479,6 +482,7 @@ struct AgentRelaySettings: View {
                             copy(AgentRelayService.snippet(AgentRelayService.cursorHooks(), cursor: true))
                         }
                     }
+                    .tint(SottoDesign.cream.opacity(0.75))
                     Text("“Add” adds only Sotto's Stop/Notification hooks to ~/.claude/settings.json or ~/.cursor/hooks.json (a backup is saved next to it) and keeps everything else. Sotto must stay in /Applications for the hooks to find it.")
                         .font(.caption)
                         .foregroundColor(.secondary)
