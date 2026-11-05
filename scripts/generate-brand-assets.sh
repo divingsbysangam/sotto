@@ -1,6 +1,6 @@
 #!/bin/bash
 # Regenerate committed icon sizes from the reviewed brand masters.
-# Requires ImageMagick for the menu-bar SVG; Xcode builds use the committed PNGs.
+# Requires ImageMagick for the menu-bar SVG and iconutil for the bundle icon.
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -14,25 +14,26 @@ fi
 MASTER=docs/media/brand/soft-wave-app-master.png
 WAVE=docs/media/brand/soft-wave-menu.svg
 APP_SET=Sotto/Assets.xcassets/AppIcon.appiconset
-MENU_SET=Sotto/Assets.xcassets/MenuBarIcon.imageset
 GLASS_SET=Sotto/Assets.xcassets/MenuBarGlassIcon.imageset
+
+brand_tmp="$(mktemp -d)"
+trap 'rm -rf "$brand_tmp"' EXIT
+mkdir "$brand_tmp/AppIcon.iconset"
 
 for size in 16 32 128 256 512; do
     magick "$MASTER" -filter Lanczos -resize "${size}x${size}" "$APP_SET/icon_${size}x${size}@1x.png"
     double_size=$((size * 2))
     magick "$MASTER" -filter Lanczos -resize "${double_size}x${double_size}" "$APP_SET/icon_${size}x${size}@2x.png"
+    cp "$APP_SET/icon_${size}x${size}@1x.png" "$brand_tmp/AppIcon.iconset/icon_${size}x${size}.png"
+    cp "$APP_SET/icon_${size}x${size}@2x.png" "$brand_tmp/AppIcon.iconset/icon_${size}x${size}@2x.png"
 done
+iconutil --convert icns --output Sotto/Resources/AppIcon.icns "$brand_tmp/AppIcon.iconset"
 
 for size in 16 18 32; do
     magick -background none "$WAVE" -resize "${size}x${size}" "docs/media/brand/menu-wave-${size}@1x.png"
     double_size=$((size * 2))
     magick -background none "$WAVE" -resize "${double_size}x${double_size}" "docs/media/brand/menu-wave-${size}@2x.png"
 done
-cp docs/media/brand/menu-wave-18@1x.png "$MENU_SET/menu-wave-18.png"
-cp docs/media/brand/menu-wave-18@2x.png "$MENU_SET/menu-wave-36.png"
-
-brand_tmp="$(mktemp -d)"
-trap 'rm -rf "$brand_tmp"' EXIT
 for appearance in light dark; do
     if [ "$appearance" = light ]; then
         wave_source=docs/media/brand/soft-wave-menu-light.svg
@@ -74,4 +75,4 @@ for size in 128 64 32 16; do
         -fill '#AAB7B6' -annotate "+${x}+443" "${size}px" "$MATRIX"
 done
 
-echo "Regenerated AppIcon sizes, menu wave exports, and glass menu bar images."
+echo "Regenerated AppIcon PNGs and ICNS, menu wave exports, and glass menu bar images."

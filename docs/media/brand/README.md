@@ -4,7 +4,7 @@
 
 `soft-wave-menu.svg` is the cream wave master; `soft-wave-menu-light.svg` is its dark-mark counterpart. The editable wave exports cover 16, 18, and 32 pt at 1× and 2×. The app's `MenuBarGlassIcon` image set combines the wave and translucent bubble at 32 × 24 pt, with 1×/2× and light/dark variants. The bubble is part of the image because SwiftUI's `MenuBarExtra` label did not display the separate glass background in the installed menu bar item.
 
-Run `./scripts/generate-brand-assets.sh` to recreate all `AppIcon.appiconset` PNGs, the menu bar exports, glass bubble images, and `size-matrix.png` from the masters. This regeneration step needs ImageMagick; normal Xcode builds use the committed PNGs.
+Run `./scripts/generate-brand-assets.sh` to recreate all `AppIcon.appiconset` PNGs, the matching `Sotto/Resources/AppIcon.icns` bundle icon, the menu bar exports, glass bubble images, and `size-matrix.png` from the masters. This regeneration step needs ImageMagick and macOS `iconutil`; normal Xcode builds use the committed assets. The menu bar keeps both appearance variants because the system menu bar can use a different appearance from Sotto's dark window.
 
 `preview-sheet.png` shows the Dock, menu bar, in-app, and marketing roles. The in-app and marketing panels are usage mockups, not additional UI shipped in Sotto. The actual app icon uses the reviewed raster master; the menu bar bubble uses the committed `MenuBarGlassIcon` variants.
 
