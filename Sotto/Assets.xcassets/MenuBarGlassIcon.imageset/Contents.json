@@ -1,0 +1,9 @@
+{
+  "images" : [
+    { "filename" : "menu-glass-light-32.png", "idiom" : "universal", "scale" : "1x" },
+    { "filename" : "menu-glass-light-64.png", "idiom" : "universal", "scale" : "2x" },
+    { "appearances" : [{ "appearance" : "luminosity", "value" : "dark" }], "filename" : "menu-glass-dark-32.png", "idiom" : "universal", "scale" : "1x" },
+    { "appearances" : [{ "appearance" : "luminosity", "value" : "dark" }], "filename" : "menu-glass-dark-64.png", "idiom" : "universal", "scale" : "2x" }
+  ],
+  "info" : { "author" : "xcode", "version" : 1 }
+}
