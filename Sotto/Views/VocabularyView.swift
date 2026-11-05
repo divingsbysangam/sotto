@@ -47,15 +47,20 @@ struct VocabularyTab: View {
             .labelsHidden()
             .frame(maxWidth: 360)
 
-            switch section {
-            case .words:
-                wordsSection
-            case .replacements:
-                ReplacementsEditor(settings: settings)
-            case .snippets:
-                SnippetsEditor(settings: settings)
+            ScrollView {
+                VStack(alignment: .leading, spacing: SottoDesign.spacing / 2) {
+                    switch section {
+                    case .words:
+                        wordsSection
+                    case .replacements:
+                        ReplacementsEditor(settings: settings)
+                    case .snippets:
+                        SnippetsEditor(settings: settings)
+                    }
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
             }
-            Spacer(minLength: 0)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
         .padding(SottoDesign.spacing)
         .background(SottoDesign.charcoal)
