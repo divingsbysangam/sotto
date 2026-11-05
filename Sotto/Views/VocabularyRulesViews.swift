@@ -15,37 +15,37 @@ struct ReplacementsEditor: View {
     }
 
     var body: some View {
-        VStack(spacing: 0) {
-            HStack {
-                TextField("When I say…", text: $spoken)
-                    .textFieldStyle(.roundedBorder)
-                Image(systemName: "arrow.right")
-                    .foregroundColor(.secondary)
-                TextField("Write…", text: $written)
-                    .textFieldStyle(.roundedBorder)
-                    .onSubmit(add)
-                Button("Add", action: add)
-                    .disabled(!canAdd)
+        VStack(alignment: .leading, spacing: SottoDesign.spacing / 2) {
+            VStack(alignment: .leading, spacing: SottoDesign.spacing / 2) {
+                Text("Replacements").font(.subheadline.weight(.semibold))
+                Text("Always write a spoken word or phrase a set way. Applied to every transcript before AI cleanup.")
+                    .font(.caption).foregroundStyle(.secondary)
+                HStack(spacing: SottoDesign.spacing / 2) {
+                    TextField("When I say…", text: $spoken)
+                        .textFieldStyle(.roundedBorder)
+                    Image(systemName: "arrow.right").foregroundStyle(.secondary)
+                    TextField("Write…", text: $written)
+                        .textFieldStyle(.roundedBorder)
+                        .onSubmit(add)
+                    Button("Add", systemImage: "plus", action: add)
+                        .sottoPrimaryAction()
+                        .disabled(!canAdd)
+                }
             }
-            .padding()
-
-            Divider()
+            .sottoSurface()
 
             if replacements.isEmpty {
-                ContentUnavailableView {
-                    Label("No Replacements", systemImage: "arrow.left.arrow.right")
-                } description: {
-                    Text("For words the transcript always gets wrong, e.g. “sotto” → “Sotto”. Matches whole words, ignoring case.")
-                }
-                .frame(maxHeight: .infinity)
+                SottoEmptyState(symbol: .vocabulary, title: "No replacements yet",
+                                detail: "For words Sotto gets wrong, add a spoken phrase and how to write it.")
+                    .frame(height: 140)
+                    .sottoSurface()
             } else {
-                List {
+                VStack(spacing: SottoDesign.spacing / 2) {
                     ForEach($replacements) { $replacement in
-                        HStack {
+                        HStack(spacing: SottoDesign.spacing / 2) {
                             TextField("Spoken", text: $replacement.spoken)
                                 .textFieldStyle(.roundedBorder)
-                            Image(systemName: "arrow.right")
-                                .foregroundColor(.secondary)
+                            Image(systemName: "arrow.right").foregroundStyle(.secondary)
                             TextField("Written", text: $replacement.written)
                                 .textFieldStyle(.roundedBorder)
                             Button {
@@ -59,18 +59,16 @@ struct ReplacementsEditor: View {
                         }
                     }
                 }
-                .listStyle(.inset)
+                .sottoSurface()
             }
-
-            Divider()
 
             HStack {
                 Text("\(replacements.count) replacement\(replacements.count == 1 ? "" : "s")")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundStyle(.secondary)
                 Spacer()
+                Text("Stored locally").foregroundStyle(.secondary)
             }
-            .padding()
+            .font(.caption)
         }
         .onAppear { replacements = settings.replacements }
         .onChange(of: replacements) { settings.replacements = replacements }
@@ -105,29 +103,30 @@ struct SnippetsEditor: View {
     @State private var editing: TextSnippet?
 
     var body: some View {
-        VStack(spacing: 0) {
-            HStack {
-                Text("Say the cue anywhere in a dictation and it's replaced with the text. AI cleanup never rewords a snippet.")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-                Spacer()
-                Button("Add Snippet…") {
-                    editing = TextSnippet(cue: "", text: "")
+        VStack(alignment: .leading, spacing: SottoDesign.spacing / 2) {
+            VStack(alignment: .leading, spacing: SottoDesign.spacing / 2) {
+                HStack {
+                    VStack(alignment: .leading, spacing: SottoDesign.spacing / 4) {
+                        Text("Snippets").font(.subheadline.weight(.semibold))
+                        Text("Say a short cue to insert a longer block of text. AI cleanup never rewords a snippet.")
+                            .font(.caption).foregroundStyle(.secondary)
+                    }
+                    Spacer()
+                    Button("Add Snippet", systemImage: "plus") {
+                        editing = TextSnippet(cue: "", text: "")
+                    }
+                    .sottoPrimaryAction()
                 }
             }
-            .padding()
-
-            Divider()
+            .sottoSurface()
 
             if snippets.isEmpty {
-                ContentUnavailableView {
-                    Label("No Snippets", systemImage: "text.badge.plus")
-                } description: {
-                    Text("E.g. say “my calendar link” to insert your booking URL, or “sign off” for your email signature.")
-                }
-                .frame(maxHeight: .infinity)
+                SottoEmptyState(symbol: .vocabulary, title: "No snippets yet",
+                                detail: "Say “my calendar link” to insert a URL, or “sign off” for a signature.")
+                    .frame(height: 140)
+                    .sottoSurface()
             } else {
-                List {
+                VStack(spacing: SottoDesign.spacing / 2) {
                     ForEach(snippets) { snippet in
                         HStack(alignment: .top) {
                             VStack(alignment: .leading, spacing: 4) {
@@ -140,6 +139,7 @@ struct SnippetsEditor: View {
                             }
                             Spacer()
                             Button("Edit") { editing = snippet }
+                                .buttonStyle(.plain)
                             Button {
                                 snippets.removeAll { $0.id == snippet.id }
                             } label: {
@@ -149,21 +149,20 @@ struct SnippetsEditor: View {
                             .buttonStyle(.plain)
                             .help("Delete")
                         }
-                        .padding(.vertical, 2)
+                        .padding(.vertical, SottoDesign.spacing / 4)
+                        if snippet.id != snippets.last?.id { Divider() }
                     }
                 }
-                .listStyle(.inset)
+                .sottoSurface()
             }
-
-            Divider()
 
             HStack {
                 Text("\(snippets.count) snippet\(snippets.count == 1 ? "" : "s")")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundStyle(.secondary)
                 Spacer()
+                Text("Stored locally").foregroundStyle(.secondary)
             }
-            .padding()
+            .font(.caption)
         }
         .onAppear { snippets = settings.snippets }
         .onChange(of: snippets) { settings.snippets = snippets }
@@ -258,6 +257,7 @@ struct VocabularyImportExportMenus: View {
             }
             .fixedSize()
         }
+        .tint(SottoDesign.cream.opacity(0.8))
         .sheet(isPresented: Binding(get: { preview != nil }, set: { if !$0 { preview = nil } })) {
             if let preview {
                 VocabularyImportSheet(source: previewSource, items: preview) { self.preview = nil }
