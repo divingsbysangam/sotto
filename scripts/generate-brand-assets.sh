@@ -36,12 +36,12 @@ trap 'rm -rf "$brand_tmp"' EXIT
 for appearance in light dark; do
     if [ "$appearance" = light ]; then
         wave_source=docs/media/brand/soft-wave-menu-light.svg
-        glass_fill='rgba(20,20,19,0.17)'
-        glass_border='rgba(20,20,19,0.40)'
+        glass_fill='rgba(20,20,19,0.09)'
+        glass_border='rgba(20,20,19,0.20)'
     else
         wave_source="$WAVE"
-        glass_fill='rgba(244,240,230,0.20)'
-        glass_border='rgba(244,240,230,0.55)'
+        glass_fill='rgba(244,240,230,0.10)'
+        glass_border='rgba(244,240,230,0.25)'
     fi
     magick -size 128x96 xc:none -fill "$glass_fill" -stroke "$glass_border" -strokewidth 4 \
         -draw 'roundrectangle 4,4 123,91 39,39' "$brand_tmp/glass.png"
