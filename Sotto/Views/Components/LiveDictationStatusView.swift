@@ -31,7 +31,16 @@ struct LiveDictationStatusView: View {
         let state = presentation
         Group {
             if dashboard {
-                dashboardStatus(state.primary)
+                VStack(alignment: .leading, spacing: SottoDesign.spacing / 2) {
+                    dashboardStatus(state.primary)
+                    if let readiness = state.readiness, readiness.status.actionTitle != nil {
+                        Divider()
+                        SottoStatusView(status: readiness.status, onAction: readiness.route.map { route in
+                            { onNavigate(route) }
+                        })
+                    }
+                }
+                .sottoSurface()
             } else {
                 VStack(alignment: .leading, spacing: 12) {
                     SottoStatusView(status: state.primary.status, onAction: state.primary.route.map { route in
@@ -111,7 +120,6 @@ struct LiveDictationStatusView: View {
                 .foregroundStyle(SottoDesign.cream.opacity(0.55))
             }
         }
-        .sottoSurface()
     }
 }
 

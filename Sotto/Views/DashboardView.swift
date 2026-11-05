@@ -260,8 +260,9 @@ struct DashboardView: View {
     }
 
     private func sourceShare(_ source: AppUsage) -> CGFloat {
-        let total = statistics.topSources.reduce(0) { $0 + $1.wordCount }
-        return total > 0 ? CGFloat(source.wordCount) / CGFloat(total) : 0
+        return statistics.totalWords > 0
+            ? CGFloat(source.wordCount) / CGFloat(statistics.totalWords)
+            : 0
     }
 
     // MARK: - Recent Transcripts
