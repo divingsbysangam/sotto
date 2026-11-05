@@ -149,7 +149,7 @@ private struct MenuAudioMeter: View {
         HStack(spacing: SottoDesign.spacing / 8) {
             ForEach(0..<20, id: \.self) { index in
                 RoundedRectangle(cornerRadius: SottoDesign.spacing / 8)
-                    .fill(index < Int(appState.audioLevel * 20) ? SottoDesign.accent : Color.secondary.opacity(0.3))
+                    .fill(index < Int(appState.audioLevel * 20) ? SottoDesign.accent : SottoDesign.meterTrack)
                     .frame(width: SottoDesign.spacing / 2, height: SottoDesign.spacing * 0.75)
             }
         }

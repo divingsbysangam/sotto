@@ -8,4 +8,4 @@ Run `./scripts/generate-brand-assets.sh` to recreate all `AppIcon.appiconset` PN
 
 `preview-sheet.png` shows the Dock, menu bar, in-app, and marketing roles. The in-app and marketing panels are usage mockups, not additional UI shipped in Sotto. The actual app icon uses the reviewed raster master; the menu bar bubble uses the committed `MenuBarGlassIcon` variants.
 
-`menu-popover-light.png` and `menu-popover-dark.png` are captures of the real `MenuBarView` rendered in an isolated test window with synthetic transcript data and the opaque accessibility fallback. They verify layout and contrast; live MenuBarExtra glass and menu bar placement require a desktop check.
+`menu-popover-light.png` and `menu-popover-dark.png` are captures of the real `MenuBarView` rendered in an isolated test window with synthetic transcript data and the opaque accessibility fallback. They verify layout and contrast; live menu bar placement requires a desktop check.
